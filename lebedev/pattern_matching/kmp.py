@@ -7,7 +7,7 @@ def compute_prefix_function(s):
         while i > 0 and s[offset] != s[i]:
             i = pi[i - 1]
 
-        pi[i] = i + (s[offset] == s[i])
+        pi[offset] = i + (s[offset] == s[i])
 
     return pi
 
