@@ -26,12 +26,19 @@ def compute_z_function(s):
 
 def match_prefix(s, p):
     n, m = len(s), len(p)
-    pi = compute_prefix_function(p + "$" + s)
-    return [i - m for i in xrange(n + 1) if pi[m + i] == m]
+    if m <= n:
+        pi = compute_prefix_function(p + "$" + s)
+        return [i - m for i in xrange(n + 1) if pi[m + i] == m]
+    else:
+        return []
 
 
 def match_z(s, p):
     n, m = len(s), len(p)
-    z = compute_z_function(p + "$" + s)
-    # Note: '+1' because of the '$' sign.
-    return [i for i in xrange(n) if z[m + i + 1] == m]
+
+    if m <= n:
+        z = compute_z_function(p + "$" + s)
+        # Note: '+1' because of the '$' sign.
+        return [i for i in xrange(n) if z[m + i + 1] == m]
+    else:
+        return []

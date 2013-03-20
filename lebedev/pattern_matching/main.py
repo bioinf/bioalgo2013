@@ -3,9 +3,10 @@
 from __future__ import print_function
 
 import functools
-import itertools
 import operator
+import random
 import re
+import string
 import time
 
 import numpy as np
@@ -52,9 +53,14 @@ def measure_all(s, p):
 
 def main():
     def periodic_string(s, n):
-        return "".join(itertools.repeat(s, n))
+        return s * n
+
+    def random_string(n, alphabet=string.letters):
+        return "".join(random.choice(alphabet) for _ in xrange(n))
 
     measure_all("abacababacaaba", "aba")
+    measure_all(random_string(20, "ab"), periodic_string(4, "ab"))
+    measure_all(random_string(4, "ab"), random_string(20, "ab"))
     measure_all(periodic_string("a", 256), periodic_string("a", 255))
     measure_all(periodic_string("abba", 64), periodic_string("abba", 64))
 

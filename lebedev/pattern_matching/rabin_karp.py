@@ -40,15 +40,16 @@ class rolling_hash(object):
 
 def match(s, p):
     n, m = len(s), len(p)
-
-    rh = rolling_hash(s)
-    pattern_hash = rh[p]
     pos = []
-    for offset in xrange(n - m + 1):
-        if (rh[offset:offset + m] == pattern_hash and
-            all(s[offset + i] == p[i] for i in xrange(m))):
-            pos.append(offset)
 
-        pattern_hash = rh.shift(pattern_hash)
+    if m <= n:
+        rh = rolling_hash(s)
+        pattern_hash = rh[p]
+        for offset in xrange(n - m + 1):
+            if (rh[offset:offset + m] == pattern_hash and
+                all(s[offset + i] == p[i] for i in xrange(m))):
+                pos.append(offset)
+
+            pattern_hash = rh.shift(pattern_hash)
 
     return pos
