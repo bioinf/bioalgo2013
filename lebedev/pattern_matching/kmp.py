@@ -13,13 +13,20 @@ def compute_prefix_function(s):
 
 
 def compute_z_function(s):
-    n = len(s)
-    z = [0] * n
-    for offset in xrange(n):
-        i = offset
-        while i < n and s[i - offset] == s[i]:
-            z[offset] += 1
+    z = [0] * len(s)
+    z[0] = len(s)
+    l = r = 0
+    for offset in xrange(1, len(s)):
+        if offset <= r:
+            z[offset] = min(z[offset - l], r - offset + 1)
+
+        i = offset + z[offset]
+        while i < len(s) and s[i] == s[i - offset]:
             i += 1
+
+        z[offset] = i - offset
+        if i - 1 > r:
+            l, r = offset, i - 1
 
     return z
 
