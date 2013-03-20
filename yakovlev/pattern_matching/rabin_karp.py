@@ -4,7 +4,7 @@ def hash( text, length, coef = 17, module = 1000001 ):
 	if text_len < length:
 		return result
 
-	result.append(sum([coef**(length-1-i)*ord(text[i]) for i in xrange(length)]) % module)
+	result.append(sum(coef**(length-1-i)*ord(text[i]) for i in xrange(length)) % module)
 	for i in xrange(length, text_len):
 		next = ( result[-1] - (coef**(length-1) * ord(text[i - length])) ) * coef
 		next += ord(text[i])
