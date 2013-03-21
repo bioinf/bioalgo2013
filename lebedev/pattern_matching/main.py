@@ -3,12 +3,19 @@
 from __future__ import print_function
 
 import functools
-import itertools
 import operator
+import random
 import re
+import string
+import sys
 import time
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    import numpypy as np
+
+    np.median = lambda xs: list(sorted(xs))[len(xs) / 2]
 
 import brute_force
 import kmp
@@ -32,7 +39,7 @@ def measure(f, s, p, num_iter=1000):
         if res != correct_res:
             print("{0:20} failed to validate! expected: {1}, got {2}"
                   .format(name, correct_res, res))
-            break
+            sys.exit(1)
     else:
         print("{0:20} mean {1:.4f}ms, sd {2:.4f}ms, median {3:.4f}ms"
               .format(name, np.mean(timings), np.std(timings),
@@ -52,11 +59,22 @@ def measure_all(s, p):
 
 def main():
     def periodic_string(s, n):
-        return "".join(itertools.repeat(s, n))
+        return s * n
 
+    def random_string(n, alphabet=string.letters):
+        n = random.randint(1, n)
+        return "".join(random.choice(alphabet) for _ in xrange(n))
+
+    # Trivial.
     measure_all("abacababacaaba", "aba")
+
+    # Fuzz.
+    for _ in xrange(10):
+        measure_all(random_string(64, "ab"), periodic_string(16, "ab"))
+        measure_all(random_string(16, "ab"), random_string(64, "ab"))
+
     measure_all(periodic_string("a", 256), periodic_string("a", 255))
-    measure_all(periodic_string("abba", 64), periodic_string("abba", 64))
+    measure_all(periodic_string("abba", 256), periodic_string("abba", 255))
 
 
 if __name__ == "__main__":
