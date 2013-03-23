@@ -51,6 +51,14 @@ def main():
 	r_rk = rabin_karp.rabin_karp(text, pattern)
 	s_rk = time.time() - s
 
+	if r_kmpp != r_bf:
+		print "KMP-Prefix error!"
+
+	if r_kmpz != r_bf:
+		print "KMP-Z error!"
+
+	if r_rk != r_bf:
+		print "Rabin-Karp error!"
 
 	print "Brute Force ({0}) ".format(s_bf)#,r_bf
 	print "KMP-Prefix  ({0}) ".format(s_kmpp)#,r_kmpp
