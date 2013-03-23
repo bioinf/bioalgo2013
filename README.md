@@ -1,7 +1,5 @@
 [Алгоритмы в биоинформатике] [bioinf]
-==========================
-
-[bioinf]: http://bioinformaticsinstitute.ru/courses/bioalgo/2013/spring
+============================
 
 Структура репозитория
 ---------------------
@@ -82,9 +80,16 @@ if __name__ == "__main__":
 -----------------------
 
 * Добавить к четырём алгоритмам из предыдущего задания алгоритм Бойера-Мура.
-  Реализовать эвристики: bad character rule, good suffix rule и Galil rule,
-  освежить в памяти все эти словосочетания можно например в lecuture notes
-  Дена [Гасфилда] (http://www.cs.ucdavis.edu/~gusfield/cs224f09/bnotes.pdf)
-  или в [Википедии] (http://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string_search_algorithm)
-* Найти (хотя бы один) пример на котором алгоритм Бойера-Мура работает быстрее
-  чем KMP.
+  Реализовать эвристики:
+   * bad character rule,
+   * good suffix rule,
+   * Galil rule.
+
+  Освежить в памяти все эти словосочетания можно например в lecuture notes
+  Дена [Гасфилда] [bm-gusfield] или в [Википедии] [bm-wiki]
+* Найти (хотя бы один) пример на котором алгоритм Бойера-Мура работает
+  быстрее чем KMP.
+
+[bioinf]: http://bioinformaticsinstitute.ru/courses/bioalgo/2013/spring
+[bm-gusfield]: http://www.cs.ucdavis.edu/~gusfield/cs224f09/bnotes.pdf
+[bm-wiki]: http://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string_search_algorithm
