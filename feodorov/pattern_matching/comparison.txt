@@ -1,0 +1,35 @@
+###### Brute best, KMP with z array worst ######
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+Brute force: 
+Running Time : 9e-06
+KMP with failure array: 
+Running Time : 1.8e-05
+KMP with z array: 
+Running Time : 2.3e-05
+Rabin - Karp: 
+Running Time : 1.3e-05
+
+###### KMP failure array best, Brute force worst ######
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT
+Brute force: 
+Running Time : 3.6e-05
+KMP with failure array: 
+Running Time : 8e-06
+KMP with z array: 
+Running Time : 1.5e-05
+Rabin - Karp: 
+Running Time : 1.1e-05
+
+###### KMP with failure array best, KMP with z array worst ######
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Brute force: 
+Running Time : 1.4e-05
+KMP with failure array: 
+Running Time : 7e-06
+KMP with z array: 
+Running Time : 1.6e-05
+Rabin - Karp: 
+Running Time : 1e-05
