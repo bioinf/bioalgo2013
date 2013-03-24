@@ -1,31 +1,33 @@
-def hash( text, length, coef = 17, module = 1000001 ):
-	result = []
-	text_len = len(text)
-	if text_len < length:
-		return result
+def hash_t( text, length, coef = 17, module = 1000001 ):
+	if len(text) < length:
+		return None
 
-	result.append(sum([coef**(length-1-i)*ord(text[i]) for i in xrange(length)]) % module)
-	for i in xrange(length, text_len):
-		next = ( result[-1] - (coef**(length-1) * ord(text[i - length])) ) * coef
-		next += ord(text[i])
-		next %= module
+	return sum(coef**(length-1-i)*ord(text[i]) for i in xrange(length)) % module
 
-		result.append(next)
+def hash_next( h, first, next, length, coef = 17, module = 1000001 ):
+	hnew = h - (coef**(length-1)) * ord(first)
+	hnew *= coef
+	hnew += ord(next)
+	hnew %= module
 
-	return result
+	return hnew
 
 def rabin_karp( text, pattern ):
 	result = []
 
 	pat_len = len(pattern)
-	h       = hash(pattern, pat_len)[0]
-	hashes  = hash(text, pat_len)
-	h_len   = len(hashes)
+	txt_len = len(text)
+	h       = hash_t(pattern, pat_len)
+	hw      = hash_t(text, pat_len)
 
-	for i in xrange(h_len):
-		if hashes[i] == h:
+	if hw == None:
+		return result
+
+	for i in xrange(txt_len - pat_len):
+		if h == hw:
 			result.append(i)
-	return result 
+		hw = hash_next(hw, text[i], text[i+pat_len],pat_len)
+	return result
 
 def main():
 	text    = raw_input()

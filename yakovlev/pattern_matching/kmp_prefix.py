@@ -5,15 +5,11 @@ def prefix_function( text ):
 	prefix   = [0 for i in xrange(text_len)]
 
 	for i in xrange(1,text_len):
-		mp = i - 1
-		c  = prefix[mp]
+		c  = prefix[i - 1]
 		while c != 0 and text[i] != text[c]:
-			mp = prefix[mp] - 1
-			c  = prefix[mp]
-		if c == 0:
-			prefix[i] = int(text[c] == text[0])
-		else:
-			prefix[i] = c + 1
+			c  = prefix[c-1]
+
+		prefix[i] = c + int(text[i] == text[c])
 
 	return prefix
 

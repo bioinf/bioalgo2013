@@ -13,25 +13,39 @@ def compute_prefix_function(s):
 
 
 def compute_z_function(s):
-    n = len(s)
-    z = [0] * n
-    for offset in xrange(n):
-        i = offset
-        while i < n and s[i - offset] == s[i]:
-            z[offset] += 1
+    z = [0] * len(s)
+    z[0] = len(s)
+    l = r = 0
+    for offset in xrange(1, len(s)):
+        if offset <= r:
+            z[offset] = min(z[offset - l], r - offset + 1)
+
+        i = offset + z[offset]
+        while i < len(s) and s[i] == s[i - offset]:
             i += 1
+
+        z[offset] = i - offset
+        if i - 1 > r:
+            l, r = offset, i - 1
 
     return z
 
 
 def match_prefix(s, p):
     n, m = len(s), len(p)
-    pi = compute_prefix_function(p + "$" + s)
-    return [i - m for i in xrange(n + 1) if pi[m + i] == m]
+    if m <= n:
+        pi = compute_prefix_function(p + "$" + s)
+        return [i - m for i in xrange(n + 1) if pi[m + i] == m]
+    else:
+        return []
 
 
 def match_z(s, p):
     n, m = len(s), len(p)
-    z = compute_z_function(p + "$" + s)
-    # Note: '+1' because of the '$' sign.
-    return [i for i in xrange(n) if z[m + i + 1] == m]
+
+    if m <= n:
+        z = compute_z_function(p + "$" + s)
+        # Note: '+1' because of the '$' sign.
+        return [i for i in xrange(n) if z[m + i + 1] == m]
+    else:
+        return []
