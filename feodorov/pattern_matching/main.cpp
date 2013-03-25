@@ -141,6 +141,17 @@ std::vector<int>& rabin_karp(std::string& sequence, std::string& pattern, std::v
 	return res;
 }
 
+typedef std::vector<int>& (*func_t)(std::string& sequence, std::string& pattern, std::vector<int>& res);
+
+void test(func_t func, std::string& sequence, std::string& pattern, std::vector<int>& res)
+{
+	clock_t start = clock();
+	for(int i = 0; i < 10000; ++i)
+		func(sequence, pattern, res);
+	clock_t ends = clock();
+	std::cout << "Running Time : " << (double) (ends - start) / CLOCKS_PER_SEC << std::endl;
+}
+
 int main()
 {
 	std::string line, sequence, pattern;
@@ -158,26 +169,14 @@ int main()
 	std::cout << sequence << std::endl << pattern << std::endl;
 
 	std::cout << "Brute force: " << std::endl;
-	clock_t start = clock();
-	brute_force(sequence, pattern, result);
-	clock_t ends = clock();
-	std::cout << "Running Time : " << (double) (ends - start) / CLOCKS_PER_SEC << std::endl;
+	test(brute_force, sequence, pattern, result);
 
 	std::cout << "KMP with failure array: " << std::endl;
-	start = clock();
-	KMP(sequence, pattern, result);
-	ends = clock();
-	std::cout << "Running Time : " << (double) (ends - start) / CLOCKS_PER_SEC << std::endl;
+	test(KMP, sequence, pattern, result);
 
 	std::cout << "KMP with z array: " << std::endl;
-	start = clock();
-	KPM_z(sequence, pattern, result);
-	ends = clock();
-	std::cout << "Running Time : " << (double) (ends - start) / CLOCKS_PER_SEC << std::endl;
+	test(KPM_z, sequence, pattern, result);
 
 	std::cout << "Rabin - Karp: " << std::endl;
-	start = clock();
-	rabin_karp(sequence, pattern, result);
-	ends = clock();
-	std::cout << "Running Time : " << (double) (ends - start) / CLOCKS_PER_SEC << std::endl;
+	test(rabin_karp, sequence, pattern, result);
 }
