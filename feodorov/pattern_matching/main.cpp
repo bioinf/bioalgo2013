@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <ctime>
+#include <cstdlib>
 
 void print_vector(std::vector<int>& res)
 {
@@ -92,7 +93,7 @@ std::vector<int>& KMP(std::string& sequence, std::string& pattern, std::vector<i
 	return res;
 }
 
-std::vector<int>& KPM_z(std::string& sequence, std::string& pattern, std::vector<int>& res)
+std::vector<int>& KMP_z(std::string& sequence, std::string& pattern, std::vector<int>& res)
 {
 	std::string str = pattern + "$" + sequence;
 	std::vector<int> z;
@@ -140,6 +141,25 @@ std::vector<int>& rabin_karp(std::string& sequence, std::string& pattern, std::v
 
 	return res;
 }
+std::string generate_random_string(int size)
+{
+	std::vector<char> str;
+	for(int i = 0; i < size; ++i)
+	{
+		switch((int)rand() % 4)
+		{
+			case 1:
+				str.push_back('A');
+			case 2:
+				str.push_back('C');
+			case 3:
+				str.push_back('G');
+			case 4:
+				str.push_back('T');
+		}
+	}
+	return std::string(str.begin(), str.end());
+}
 
 typedef std::vector<int>& (*func_t)(std::string& sequence, std::string& pattern, std::vector<int>& res);
 
@@ -150,6 +170,35 @@ void test(func_t func, std::string& sequence, std::string& pattern, std::vector<
 		func(sequence, pattern, res);
 	clock_t ends = clock();
 	std::cout << "Running Time : " << (double) (ends - start) / CLOCKS_PER_SEC << std::endl;
+}
+
+void test_correctness()
+{
+	std::cout << "Correctness test" << std::endl;
+	for(int i = 0; i < 100; ++i)
+	{
+		std::string pattern = generate_random_string(5);
+		std::string text = generate_random_string(50);
+
+		std::vector<int> bruteforce_res, kmp_prefix_res, kmp_z_res, rk_z_res;
+		brute_force(text, pattern, bruteforce_res);
+		KMP(text, pattern, kmp_prefix_res);
+		KMP_z(text, pattern, kmp_z_res);
+		rabin_karp(text, pattern, rk_z_res);
+		for(int i = 0; i < kmp_z_res.size(); ++i)
+		{
+			if(bruteforce_res[i] != kmp_prefix_res[i] || kmp_z_res[i] != rk_z_res[i] ||
+					bruteforce_res[i] != kmp_z_res[i] || kmp_prefix_res[i] != rk_z_res[i])
+			{
+				std::cout << "bruteforce: " << bruteforce_res[i] << std::endl;
+				std::cout << "kmp_prefix_res: " << kmp_prefix_res[i] << std::endl;
+				std::cout << "kmp_z_res: " << kmp_z_res[i] << std::endl;
+				std::cout << "rk_z_res: " << rk_z_res[i] << std::endl;
+				std::cout << "Error for pattern " << pattern << " in " << text << std::endl;
+			}
+		}
+	}
+	std::cout << "Passed" << std::endl;
 }
 
 int main()
@@ -175,8 +224,10 @@ int main()
 	test(KMP, sequence, pattern, result);
 
 	std::cout << "KMP with z array: " << std::endl;
-	test(KPM_z, sequence, pattern, result);
+	test(KMP_z, sequence, pattern, result);
 
 	std::cout << "Rabin - Karp: " << std::endl;
 	test(rabin_karp, sequence, pattern, result);
+
+	test_correctness();
 }
