@@ -1,21 +1,14 @@
 def brute_force(text, pattern):
-  result = []
+    text_len = len(text)
+    for i in range(text_len):
+        k = i
+        for j in range(len(pattern)):
+            if k == text_len or pattern[j] != text[k]:
+                break
+            k += 1
+        else:
+            yield(i+1)
 
-	text_len = len(text)
-	patt_len = len(pattern)
-
-	for i in range(text_len):
-		k = i
-		for j in range(patt_len):
-			if k == text_len or pattern[j] != text[k]:
-				break
-			k += 1
-		else:
-			yield(i)
-
-
-def main():
-	text    = raw_input()
-	pattern = raw_input()
-
-	print(list(brute_force(text, pattern)))
+text    = input()
+pattern = input()
+print(list(brute_force(text, pattern)))
