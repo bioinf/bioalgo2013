@@ -5,19 +5,18 @@
  * Time: 13:56
  * To change this template use File | Settings | File Templates.
  */
+import java.util.*;
 public class Strstr {
-     public static void bruteForce(String text,String pattern)
+
+    public static void bruteForce(String text,String pattern)
      {
          for(int i=0;i<text.length()-pattern.length()+1;i++)  //O(|T|)
                  if(pattern.equals(text.substring(i,pattern.length()+i)))// O(|P|)
                      System.out.print(i+" ");
          System.out.println();
      }
-
-     public static long hash(String s)
+     public static long hash(String s,int p,int mod)
      {
-         int p=5;
-         int mod=100001;
          int z=p;
          long h=0;
 
@@ -28,22 +27,42 @@ public class Strstr {
          }
          return h;
      }
+     public static int convert(char a)
+     {
+         switch (a){
+             case 'A':
+                 return 1;
+             case 'C':
+                 return 2;
+             case 'G':
+                 return 3;
+             case 'T':
+                 return 4;
+             default:
+                 return 0;
+         }
+     }
+     public static long pow(long a,long b)
+     {
+         long res=1;
+         for(int i=0;i<b;i++)
+            res=res*a;
+         return res;
+     }
      public static void rabKarp(String text,String pattern)
      {
-         long hp=hash(pattern);
-         long h=hash(text.substring(0,pattern.length()));
          int p=5;
-         int r=100001;
-         for(int i=0;i<text.length()-pattern.length();i++){
+         int r=4294967;
+         long hp=hash(pattern,p,r);
+         long h=hash(text.substring(0,pattern.length()),p,r);
+         for(int i=0;i<text.length()-pattern.length()+1;i++){
+             if(h == hp)
+                 if(pattern.equals(text.substring(i,pattern.length()+i)))
+                     System.out.print(i+" ");
+            // h = (p * h - pow(p,pattern.length()) * hash(text.charAt(i),p,r) + hash(text.substring(i+pattern.length(),i+pattern.length()+1),p,r))%r;
+            // System.out.println(i+" "+h+" "+hp);
+            // System.out.println(text.substring(i,i+1)+" "+text.substring(i+pattern.length(),i+pattern.length()+1));
 
-             if(hp == h)
-             {
-                System.out.print(i);
-             }
-             h = (p * h - p * hash(text.substring(i,i+1)) + hash(text.substring(i+pattern.length(),i+pattern.length()+1)))%r;
-             if (h < 0)
-                h += r;
-             //System.out.println(h);
          }
 
 
@@ -112,17 +131,61 @@ public class Strstr {
                 System.out.print((i-pattern.length()-1)+" ");
 
      }
+     public static int nextRight(List<Integer>[] list,char x,int k)
+     {
+         //List список где хронятся вхождения букв в шаблон, x - символ который ищим, k - правее заданой позиции
+         for(int i=0; i < list[convert(x)-1].size();i++)
+             if(list[convert(x)-1].get(i) < k) return list[convert(x)-1].get(i);
+         return -1;
+     }
+     public static void badCharacterRule(String text,String pattern)
+     {
+         int shift;
+         //Список для поиска правых вхождений
+         List<Integer>[] arrChar = new List[4];
+         for(int i=0;i<4;i++)
+             arrChar[i]=new ArrayList<Integer>();
+         //Препроцессинг
+         for(int i=pattern.length()-1;i>=0;i--)
+            arrChar[convert(pattern.charAt(i))-1].add(i);
+         for(int i=0;i<text.length()-pattern.length()+1;i++)
+         {
+             for(int j=pattern.length()-1; j >=0;j--)
+             {
+                 if(pattern.charAt(j) == text.charAt(i+j)){  //Полное вхождение
+                    if(j == 0) System.out.print(i+" ");
+                 }
+                 else
+                    {
+                        shift=nextRight(arrChar,text.charAt(i+j),j); //Считаем нужный сдвиг
+                        if(shift == -1)
+                        {
+                           i+=pattern.length()-1; //Буква не встретилась, сдвигаем на весь шаблон
+                           break;
+                        }
+                        else
+                        {
+                           i+=pattern.length()-shift-2; //Сдвигаем на разность -2 так как номирация 2 раза с 0, а длины с 1.
+                           break;
+                        }
+                    }
+             }
+         }
+     }
 
      public static void main(String[] arg)
      {
-         System.out.println("bruteForce: ");
+         /*System.out.println("bruteForce: ");
          bruteForce("AATGTGTCAA","TGT");
          System.out.println("pefixFunction: ");
          pefixFunction("AATGTGTCAA","TGT");
          System.out.println("zFunction: ");
          zFunction("AATGTGTCAA","TGT");
          System.out.println("rabKarp: ");
-         rabKarp("AATGTGTCAA","TGT");
+         rabKarp("TGTGT","TGT");    */
+         badCharacterRule("AAACTGTGTGTAAAA","TGT");
+
      }
+
 
 }
