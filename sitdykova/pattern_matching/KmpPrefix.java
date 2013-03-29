@@ -38,6 +38,6 @@ public class KmpPrefix  {
 		/*for (int pos : ans) {
 			System.out.print(pos + " ");
 		}
-		System.out.println();*/
+		System.out.println(); */
 	}
 }

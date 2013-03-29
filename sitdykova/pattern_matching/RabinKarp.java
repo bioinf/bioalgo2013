@@ -76,6 +76,6 @@ public class RabinKarp {
 		/*for (int pos : ans) {
 			System.out.print(pos + " ");
 		}
-		System.out.println();*/
+		System.out.println(); */
 	}
 }
