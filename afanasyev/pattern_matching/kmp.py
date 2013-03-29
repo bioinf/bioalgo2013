@@ -1,4 +1,4 @@
-seq = open('D:\\temp\\my.txt', 'r').readline()
+seq = open('input.txt', 'r').readline()
 seq = seq.replace('\n', '')
 seq = seq.replace('\r', '')
 
@@ -17,7 +17,7 @@ while i < len(seq):
         out.append(0)
         i += 1
 
-f = open('D:\\temp\\my2.txt', 'w')
+f = open('output.txt', 'w')
 for i in out:
     f.write(str(i) + ' ')
 
