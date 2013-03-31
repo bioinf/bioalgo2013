@@ -1,23 +1,53 @@
+###### KMP better than Boyer-Moore with bad char ######
+TTATATATTTATATATTTATATATTTATATATTTATATATTTATATATTTATATATTTATATATTTATATATTTATATATTTATATATTTATATAT
+ATATATAT
+Boyer-Moore bad char: 
+Running Time : 0.418442
+Boyer-Moore good suffix: 
+Running Time : 0.018578
+Boyer-Moore good suffix with galil: 
+Running Time : 0.023819
+Brute force: 
+Running Time : 0.124805
+KMP with failure array: 
+Running Time : 0.037153
+KMP with z array: 
+Running Time : 0.103727
+Rabin - Karp: 
+Running Time : 0.080666
+
 ###### Brute best, KMP with z array worst ######
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 Brute force: 
-Running Time : 0.00855
+Running Time : 9e-06
 KMP with failure array: 
-Running Time : 0.040104
+Running Time : 1.8e-05
 KMP with z array: 
-Running Time : 0.082413
+Running Time : 2.3e-05
 Rabin - Karp: 
-Running Time : 0.040745
+Running Time : 1.3e-05
 
 ###### KMP failure array best, Brute force worst ######
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT
 Brute force: 
-Running Time : 0.241176
+Running Time : 3.6e-05
 KMP with failure array: 
-Running Time : 0.03202
+Running Time : 8e-06
 KMP with z array: 
-Running Time : 0.096063
+Running Time : 1.5e-05
 Rabin - Karp: 
-Running Time : 0.052803
+Running Time : 1.1e-05
+
+###### KMP with failure array best, KMP with z array worst ######
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Brute force: 
+Running Time : 1.4e-05
+KMP with failure array: 
+Running Time : 7e-06
+KMP with z array: 
+Running Time : 1.6e-05
+Rabin - Karp: 
+Running Time : 1e-05
