@@ -1,5 +1,8 @@
 #include <iostream>
 #include <vector>
+#include <map>
+#include <string>
+#include <list>
 #include <string>
 #include <fstream>
 #include <ctime>
@@ -78,12 +81,12 @@ std::vector<int>& KMP(std::string& sequence, std::string& pattern, std::vector<i
 	failure_array = get_failure_array(pattern, failure_array);
 
 	int i = 0, j = 0;
-	while (i < sequence.size())
+	while (i < (int)sequence.size())
 	{
 		while (j >= 0 && sequence[i] != pattern[j])
 			j = failure_array[j];
 		i++; j++;
-		if (j == pattern.size())
+		if (j == (int)pattern.size())
 		{
 			res.push_back(i - j);
 			j = failure_array[j];
@@ -101,7 +104,7 @@ std::vector<int>& KMP_z(std::string& sequence, std::string& pattern, std::vector
 
 	z = z_function(str, z);
 	for(unsigned int i = pattern.size() + 1; i < str.size(); ++i)
-		if(z[i] == pattern.size())
+		if(z[i] == (int)pattern.size())
 			res.push_back(i - pattern.size() - 1);
 
 	return res;
@@ -172,6 +175,80 @@ void test(func_t func, std::string& sequence, std::string& pattern, std::vector<
 	std::cout << "Running Time : " << (double) (ends - start) / CLOCKS_PER_SEC << std::endl;
 }
 
+void boyer_moor_bad_char_preprocess(const std::string& pattern, std::map<char, std::list<int> >& res)
+{
+	for(int i = (int)pattern.length() - 1; i >= 0; --i)
+	{
+		res[pattern[i]].push_back(i);
+	}
+}
+
+int boyer_moor_get_nearest_left_same_char_pos(const std::map<char, std::list<int> >& data, char c, int pos)
+{
+	std::map<char, std::list<int> >::const_iterator it;
+	if(data.end() != (it = data.find(c)))
+	{
+		for(std::list<int>::const_iterator iter = it->second.begin(); iter != it->second.end(); ++iter)
+		{
+			if(*iter < pos)
+			{
+				return *iter;
+			}
+		}
+	}
+
+	return -1;
+}
+
+void print_map_of_lists(const std::map<char, std::list<int> >& data)
+{
+	for(std::map<char, std::list<int> >::const_iterator it = data.begin(); it != data.end(); ++it)
+	{
+		std::cout << it->first << ": ";
+		for(std::list<int>::const_iterator iter = it->second.begin(); iter != it->second.end(); ++iter)
+		{
+			std::cout << *iter << " ";
+		}
+		std::cout << std::endl;
+	}
+}
+
+std::vector<int>& boyer_moor_bad_char(std::string& text, std::string& pattern, std::vector<int>& res)
+{
+	std::map<char, std::list<int> > data;
+	boyer_moor_bad_char_preprocess(pattern, data);
+//	print_map_of_lists(data);
+
+	int i = pattern.length() - 1;
+
+	while(i < (int)text.length())
+	{
+		int k = 0;
+		//iterate through pattern to find matches
+		for(; k < (int)pattern.length(); ++k)
+		{
+			//if mismatch - shift right by bad-char-table-rule
+			if(text[i - k] != pattern[pattern.length() - 1 - k])
+			{
+				char char_to_found = text[i - k];
+				int from_pos = pattern.length() - 1 - k;
+				int pos = boyer_moor_get_nearest_left_same_char_pos(data, char_to_found, from_pos);
+				i += pos == -1 ? 1 : from_pos - pos;
+				break;
+			}
+		}
+
+		if(k == (int)pattern.length())
+		{
+			res.push_back(i - k + 1);
+			i++;
+		}
+	}
+
+	return res;
+//	std::cout << "Stop tests" << std::endl;
+}
+
 void test_correctness()
 {
 	std::cout << "Correctness test" << std::endl;
@@ -180,20 +257,23 @@ void test_correctness()
 		std::string pattern = generate_random_string(5);
 		std::string text = generate_random_string(50);
 
-		std::vector<int> bruteforce_res, kmp_prefix_res, kmp_z_res, rk_z_res;
+		std::vector<int> bruteforce_res, kmp_prefix_res, kmp_z_res, rk_z_res, bm_bchar_res;
 		brute_force(text, pattern, bruteforce_res);
 		KMP(text, pattern, kmp_prefix_res);
 		KMP_z(text, pattern, kmp_z_res);
 		rabin_karp(text, pattern, rk_z_res);
-		for(int i = 0; i < kmp_z_res.size(); ++i)
+		boyer_moor_bad_char(text, pattern, bm_bchar_res);
+
+		for(int i = 0; i < (int)kmp_z_res.size(); ++i)
 		{
 			if(bruteforce_res[i] != kmp_prefix_res[i] || kmp_z_res[i] != rk_z_res[i] ||
-					bruteforce_res[i] != kmp_z_res[i] || kmp_prefix_res[i] != rk_z_res[i])
+					bruteforce_res[i] != kmp_z_res[i] || kmp_prefix_res[i] != rk_z_res[i] || bm_bchar_res[i] != rk_z_res[i])
 			{
 				std::cout << "bruteforce: " << bruteforce_res[i] << std::endl;
 				std::cout << "kmp_prefix_res: " << kmp_prefix_res[i] << std::endl;
 				std::cout << "kmp_z_res: " << kmp_z_res[i] << std::endl;
 				std::cout << "rk_z_res: " << rk_z_res[i] << std::endl;
+				std::cout << "bm_bchar_res: " << bm_bchar_res[i] << std::endl;
 				std::cout << "Error for pattern " << pattern << " in " << text << std::endl;
 			}
 		}
@@ -217,17 +297,20 @@ int main()
 	std::vector<int> result;
 	std::cout << sequence << std::endl << pattern << std::endl;
 
-	std::cout << "Brute force: " << std::endl;
-	test(brute_force, sequence, pattern, result);
+//	std::cout << "Boyer-Moore bad char: " << std::endl;
+//	test(boyer_moor_bad_char, sequence, pattern, result);
 
-	std::cout << "KMP with failure array: " << std::endl;
-	test(KMP, sequence, pattern, result);
-
-	std::cout << "KMP with z array: " << std::endl;
-	test(KMP_z, sequence, pattern, result);
-
-	std::cout << "Rabin - Karp: " << std::endl;
-	test(rabin_karp, sequence, pattern, result);
-
+//	std::cout << "Brute force: " << std::endl;
+//	test(brute_force, sequence, pattern, result);
+//
+//	std::cout << "KMP with failure array: " << std::endl;
+//	test(KMP, sequence, pattern, result);
+//
+//	std::cout << "KMP with z array: " << std::endl;
+//	test(KMP_z, sequence, pattern, result);
+//
+//	std::cout << "Rabin - Karp: " << std::endl;
+//	test(rabin_karp, sequence, pattern, result);
+//
 	test_correctness();
 }
