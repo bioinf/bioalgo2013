@@ -64,8 +64,7 @@ def match(s, p):
                                    good_suffix, suffix_prefix)
             if matched:
                 pos.append(offset - m + 1)
-                offset += shift
-            else:
-                offset += shift
+
+            offset += shift
 
     return pos

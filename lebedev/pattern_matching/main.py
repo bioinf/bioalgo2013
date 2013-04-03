@@ -74,10 +74,15 @@ def main():
     for _ in xrange(10):
         measure_all(random_string(64, "ab"), periodic_string(16, "ab"))
         measure_all(random_string(16, "ab"), random_string(64, "ab"))
-        measure_all(random_string(256), random_string(64))
 
     measure_all(periodic_string("a", 256), periodic_string("a", 255))
     measure_all(periodic_string("abba", 256), periodic_string("abba", 255))
+
+    # Huge.
+    measure_all(random_string(4096), random_string(64))
+    measure_all(random_string(4096), random_string(128))
+    measure_all(random_string(4096), random_string(256))
+    measure_all(random_string(4096), random_string(512))
 
 
 if __name__ == "__main__":
