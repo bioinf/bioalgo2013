@@ -1,12 +1,16 @@
-import brute_force
-import kmp_prefix
-import kmp_z
-import rabin_karp
+from brute_force import brute_force as bf
+from kmp_prefix import kmp_prefix as kmpp
+from kmp_z import kmp_z as kmpz
+from rabin_karp import rabin_karp as rk
+from boyer_moore import boyer_moore as bm
 
 import sys
 import time
 
 import random
+import string
+
+from operator import eq
 
 def gettest():
 	NUCLEO = "ACGT"
@@ -23,6 +27,36 @@ def gettest():
 
 	return "".join(text), "".join(pattern)
 
+def gettime( function, text, pattern ):
+	s = time.time()
+	r = function(text, pattern)
+	s = time.time() - s
+
+	return r,s
+
+def getavgtime( function, text, pattern, n = 1000 ):
+	s = sum(gettime(function, text, pattern)[1] for i in xrange(n))
+	return s / n
+
+def getrandomstring( size ):
+	return ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(size))
+
+def validate():
+	funcs = [bf, kmpp, kmpz, rk, bm]
+
+	for i in xrange(10):
+		text = getrandomstring(500)
+		pattern = getrandomstring(10)
+		if random.randint(0,1):
+			pattern = text[random.randint(0,100):random.randint(100,200)]
+
+
+		l = [f(text,pattern) for f in funcs]
+		for i in l[1:]:
+			if i != l[0]:
+				return False
+	return True
+
 def main():
 	if len(sys.argv) < 3:
 		print "Usage:",sys.argv[0],"text pattern"
@@ -32,38 +66,23 @@ def main():
 		text    = sys.argv[1]
 		pattern = sys.argv[2]
 
+	if not validate():
+		print "Some algorithms are not valid"
+
 	print "Text:   ",text
 	print "Pattern:",pattern
 
-	s = time.time()
-	r_bf = brute_force.brute_force(text, pattern)
-	s_bf = time.time() - s
+	s_bf = getavgtime(bf, text, pattern)
+	s_kmpp = getavgtime(kmpp, text, pattern)
+	s_kmpz = getavgtime(kmpz, text, pattern)
+	s_rk = getavgtime(rk, text, pattern)
+	s_bm = getavgtime(bm, text, pattern)	
 
-	s = time.time()
-	r_kmpp = kmp_prefix.kmp_prefix(text, pattern)
-	s_kmpp = time.time() - s
-
-	s = time.time()
-	r_kmpz = kmp_z.kmp_z(text, pattern)
-	s_kmpz = time.time() - s
-
-	s = time.time()
-	r_rk = rabin_karp.rabin_karp(text, pattern)
-	s_rk = time.time() - s
-
-	if r_kmpp != r_bf:
-		print "KMP-Prefix error!"
-
-	if r_kmpz != r_bf:
-		print "KMP-Z error!"
-
-	if r_rk != r_bf:
-		print "Rabin-Karp error!"
-
-	print "Brute Force ({0}) ".format(s_bf)#,r_bf
-	print "KMP-Prefix  ({0}) ".format(s_kmpp)#,r_kmpp
-	print "KMP-Z       ({0}) ".format(s_kmpz)#,r_kmpz
-	print "Rabin-Karp  ({0}) ".format(s_rk)#,r_rk
+	print "Brute Force ({0}) ".format(s_bf)
+	print "KMP-Prefix  ({0}) ".format(s_kmpp)
+	print "KMP-Z       ({0}) ".format(s_kmpz)
+	print "Rabin-Karp  ({0}) ".format(s_rk)
+	print "Boyer-Moore ({0}) ".format(s_bm)
 
 if __name__ == "__main__":
 	main()
