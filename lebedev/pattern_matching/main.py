@@ -20,6 +20,7 @@ except ImportError:
 import brute_force
 import kmp
 import rabin_karp
+import boyer_moore
 
 
 def match_like_a_boss(s, p):
@@ -49,7 +50,8 @@ def measure_all(s, p):
     methods = [brute_force.match,
                rabin_karp.match,
                kmp.match_prefix,
-               kmp.match_z]  # Stub.
+               kmp.match_z,
+               boyer_moore.match]
 
     print("T = {0!r}\nP = {1!r}".format(s, p))
     for method in methods:
@@ -72,6 +74,7 @@ def main():
     for _ in xrange(10):
         measure_all(random_string(64, "ab"), periodic_string(16, "ab"))
         measure_all(random_string(16, "ab"), random_string(64, "ab"))
+        measure_all(random_string(256), random_string(64))
 
     measure_all(periodic_string("a", 256), periodic_string("a", 255))
     measure_all(periodic_string("abba", 256), periodic_string("abba", 255))
