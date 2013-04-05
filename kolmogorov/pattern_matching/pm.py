@@ -84,11 +84,8 @@ def z_find(string, pattern):
 		if z_f[i] == len(pattern):
 			found.append(i - len(pattern) - 1)
 	return found
-	#for i in xrange(len(
 
 print kmp   ("abraabcabcababcaba", "abcaba")
 print karp  ("abraabcabcababcaba", "abcaba")
 print naive ("abraabcabcababcaba", "abcaba")
 print z_find("abraabcabcababcaba", "abcaba")
-#print z_function("ababcaba")
-#print prefixFunc("abcaba")
