@@ -17,15 +17,15 @@ public class Strstr {
                 result.add(i);
         return result;
     }
-    public static long hash(String s,int p,int mod)
+    public static long hash(String s,int[] pow,int mod)
     {
-        int z=p;
         long h=0;
-
-        for(int i=0; i < s.length();i++)
+        /**
+         * Example S[2]+S[1]P+S[0]P^2
+         */
+        for(int i=s.length()-1; i >= 0 ;i--)
         {
-            h+=(Integer.valueOf(s.charAt(i))*z)%mod;
-            z=z*p;
+            h=(h+convert(s.charAt(s.length()-1-i))*pow[i])%mod;
         }
         return h;
     }
@@ -44,30 +44,26 @@ public class Strstr {
                 return 0;
         }
     }
-    public static long pow(long a,long b)
-    {
-        long res=1;
-        for(int i=0;i<b;i++)
-            res=res*a;
-        return res;
-    }
-    public static void rabKarp(String text,String pattern)
+    public static ArrayList<Integer> rabKarp(String text,String pattern)
     {
         int p=5;
-        int r=4294967;
-        long hp=hash(pattern,p,r);
-        long h=hash(text.substring(0,pattern.length()),p,r);
-        for(int i=0;i<text.length()-pattern.length()+1;i++){
+        int r=45564345;
+        ArrayList<Integer> result = new ArrayList<Integer>();
+        int[] pow = new int[text.length()];
+        pow[0]=1;
+        for(int i=1;i<pow.length;i++)
+            pow[i]+=(pow[i-1]*p);
+        long h=hash(text.substring(0,pattern.length()),pow,r);
+        long hp=hash(pattern,pow,r);
+        for(int i=0;i<text.length()-pattern.length()+1;i++)
+        {
             if(h == hp)
                 if(pattern.equals(text.substring(i,pattern.length()+i)))
-                    System.out.print(i+" ");
-            // h = (p * h - pow(p,pattern.length()) * hash(text.charAt(i),p,r) + hash(text.substring(i+pattern.length(),i+pattern.length()+1),p,r))%r;
-            // System.out.println(i+" "+h+" "+hp);
-            // System.out.println(text.substring(i,i+1)+" "+text.substring(i+pattern.length(),i+pattern.length()+1));
-
+                    result.add(i);
+            if(text.length()-pattern.length() > i)
+                hp=(p*hp-pow[pattern.length()]*convert(text.charAt(i))+convert(text.charAt(i+pattern.length())))%r;
         }
-
-
+        return result;
     }
     public static ArrayList<Integer> pefixFunction(String text,String pattern)
     {
@@ -94,12 +90,11 @@ public class Strstr {
         return result;
 
     }
-    public static ArrayList<Integer> zFunction(String text,String pattern) //O(|T|+|P|)
+    public static int[] zFunction(String s) //O(|T|+|P|)
     {
-        ArrayList<Integer> result = new ArrayList<Integer>();
-        int n=text.length()+pattern.length();
-        int[] z = new int[n];
-        String s=pattern+"#"+text;  //# - сентинел
+
+        int n=s.length();
+        int[] z=new int[n];
         int l=0;
         int r=0;
         for(int i=0; i < n;i++)
@@ -130,11 +125,19 @@ public class Strstr {
                 }
             }
         }
+        return z;
+
+    }
+    public static ArrayList<Integer> kMPZ(String text,String pattern)
+    {
+        ArrayList<Integer> result =  new ArrayList<Integer>();
+        int n=text.length()+pattern.length();
+        String s=pattern+"#"+text;  //# - сентинел
+        int[] z = zFunction(s);
         for(int i=0; i < n; i++)
             if(z[i] == pattern.length())
                 result.add(i-pattern.length()-1);
         return result;
-
     }
     public static int nextRight(List<Integer>[] list,char x,int k)
     {
@@ -171,7 +174,7 @@ public class Strstr {
                     }
                     else
                     {
-                        i+=pattern.length()-shift-2; //Сдвигаем на разность -2 так как номирация 2 раза с 0, а длины с 1.
+                        i+=pattern.length()-shift-2;
                         break;
                     }
                 }
@@ -179,17 +182,43 @@ public class Strstr {
         }
         return result;
     }
+    public static ArrayList<Integer> galilRule(String text,String pattern)
+    {
+      ArrayList<Integer> result=new ArrayList<Integer>();
+      int[] z = zFunction(pattern);
+      int k=0;
+      for(int i=0; i<text.length()-pattern.length()-1;i++)
+      {
+          for(int j=pattern.length()-1;j>=k;j--)
+          {
+             if(pattern.charAt(j) == text.charAt(i+j))
+             {
+                if(j == 0)
+                    result.add(i);
+             }
+             else
+             {
+                 k=(j+1==pattern.length())?0:z[j+1];
+                 i+=pattern.length()-1-k;
+                 break;
+             }
+          }
+      }
+
+      return result;
+    }
+
     public static int correct (ArrayList<Integer> a,ArrayList<Integer> b, ArrayList<Integer> c,
                                ArrayList<Integer> d, ArrayList<Integer> e,ArrayList<Integer> u )
     {
-       int flag=0;
-       if(a.size() == b.size() && a.size() == b.size() && a.size() == c.size() &&
-               a.size() == d.size() && a.size() == e.size() && a.size() == u.size())
-               for(int i=0;i<a.size();i++)
-                   if(a.get(i)!= b.get(i) || a.get(i) != b.get(i) || a.get(i) != c.get(i) ||
-                           a.get(i) != d.get(i) || a.get(i) != e.get(i) || a.get(i) != u.get(i))
-                                flag=1;
-       return flag;
+        int flag=0;
+        if(a.size() != b.size() && a.size() != b.size() && a.size() != c.size() &&
+                a.size() != d.size() && a.size() != e.size() && a.size() != u.size())
+            for(int i=0;i<a.size();i++)
+                if(a.get(i)!= b.get(i) || a.get(i) != b.get(i) || a.get(i) != c.get(i) ||
+                        a.get(i) != d.get(i) || a.get(i) != e.get(i) || a.get(i) != u.get(i))
+                    flag=1;
+        return flag;
     }
 
     public static void test()
@@ -200,22 +229,46 @@ public class Strstr {
     public static void main(String[] arg) throws IOException
     {
 
-         BufferedReader reader = new BufferedReader(new FileReader("/Users/ingvard/IdeaProjects/Strstr/src/DataSet.txt"));
-         ArrayList<Integer> bf,pf,zf,rk,bc,gc;
-         String text,pattern;
-         while((text=reader.readLine()) != null){
+        BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\ingvard\\IdeaProjects\\Strstr\\src\\DataSet.txt"));
+        BufferedWriter output = new BufferedWriter(new FileWriter("C:\\Users\\ingvard\\IdeaProjects\\Strstr\\src\\report.txt"));
+        ArrayList<Integer> bf,pf,zf,rk,bc,gc;
+        String text,pattern;
+        long[] result = new long[6];
+        long time;
+        while((text=reader.readLine()) != null){
             pattern=reader.readLine();
-            bf=bruteForce(text,pattern);
-            pf=pefixFunction(text,pattern);
-            zf=zFunction(text,pattern);
-            //rk=rabKarp("TGTGT","TGT");
-            bc=badCharacterRule(text,pattern);
-            System.out.println(correct(bc,pf,pf,pf,pf,pf));
-         }
-        rabKarp("TGTTGT","TGT");
+            Arrays.fill(result,0);
+            output.write("Test string: "+text+" \n pattern: "+pattern+" \n");
+            for(int i=0;i<1000;i++)
+            {
+                time = System.currentTimeMillis();
+                bf=bruteForce(text, pattern);
+                result[0]+=(System.currentTimeMillis()-time);
+                time = System.currentTimeMillis();
+                pf=pefixFunction(text,pattern);
+                result[1]+=(System.currentTimeMillis()-time);
+                time = System.currentTimeMillis();
+                zf=kMPZ(text,pattern);
+                result[2]+=(System.currentTimeMillis()-time);
+                time = System.currentTimeMillis();
+                rk=rabKarp(text,pattern);
+                result[3]+=(System.currentTimeMillis()-time);
+                time = System.currentTimeMillis();
+                bc=badCharacterRule(text,pattern);
+                result[4]+=(System.currentTimeMillis()-time);
+                time = System.currentTimeMillis();
+                //gc=galilRule(text,pattern);
+                result[5]+=(System.currentTimeMillis()-time);
+            }
+            output.write("bruteForce: " + (result[0]) + " ms \n");
+            output.write("pefixFunction: "+(result[1])+" ms \n");
+            output.write("kMPZ: "+(result[2])+" ms \n");
+            output.write("rabKarp: "+(result[3])+" ms \n");
+            output.write("badCharacterRule: "+(result[4])+" ms \n");
+            output.write("galilRule: "+(result[5])+" ms \n");
+            output.write("The total length: text "+text.length()*1000+" patter "+pattern.length()*1000+" \n ********************************************************************** \n");
 
+        }
+        output.close();
     }
-
-
-
 }
