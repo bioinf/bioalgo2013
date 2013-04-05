@@ -67,7 +67,7 @@ class hash:
 		return (self.hashes[right] - self.hashes[left] * self.power[right - left]) % self.hash_m
 
 def rabin_karp(s, t):
-	hash_p = 100
+	hash_p = 257
 	hash_m = 10 ** 9 + 7
 	slen = len(s)
 	tlen = len(t)
@@ -80,6 +80,43 @@ def rabin_karp(s, t):
 		
 	return match
 
+def boyer_moore(s, t):
+	tlen = len(t)
+	slen = len(s)
+	shift_one = {'A' : -1, 'C' : -1, 'G' : -1, 'T' : -1}
+	for i in range(tlen - 1):
+		shift_one[t[i]] = i
+	z = z_function(t[::-1])
+	max_z = 0
+	shift_many = [1]
+	for i in range(tlen):
+		if max_z < z[i]:
+			for j in range(max_z, z[i]):
+				shift_many.append(i)
+				max_z = z[i]
+	for i in range(len(shift_many), tlen + 1):
+		shift_many.append(1)
+	
+	match = []
+	i = tlen - 1
+	while i < slen:
+		j = tlen - 1
+		if (s[i] != t[j]):
+			i += 1 if shift_one[s[i]] < 0 else (tlen - shift_one[s[i]] - 1)
+		else:
+			k = i
+			while j >= 0 and s[k] == t[j]:
+				j -= 1
+				k -= 1
+			if j == -1:
+				match.append(i - tlen + 1)
+				i += 1
+			else:
+				i += shift_many[j]
+			
+	return match		
+	
+
 def get_string(n, alp):
 	return "".join(random.choice(alp) for _ in range(n))
 
@@ -89,19 +126,21 @@ def correct_test(n, m):
 	while True:
 		text = get_string(n, nucleotids)
 		pattern = get_string(m, nucleotids)
-		
+		print ('test', text, pattern)
 		m1 = naive(text, pattern)
 		m2 = kmp(prefix_function, text, pattern)
 		m3 = kmp(z_function, text, pattern)
 		m4 = rabin_karp(text, pattern)
+		m5 = boyer_moore(text, pattern)
 		
-		if (m1 != m2 or m2 != m3 or m3 != m4):
+		if (m1 != m2 or m2 != m3 or m3 != m4 or m4 != m5):
 			print('test')
 			print(text, pattern)
 			print(m1)
 			print(m2)
 			print(m3)
 			print(m4)
+			print(m5)
 			break
 
 def main():
