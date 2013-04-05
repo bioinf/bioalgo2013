@@ -3,7 +3,4 @@ bruteForce
 pefixFunction
 zFunction
 badCharacterRule
-Сломал:
 rabKarp
-Комментарий:
-Сейчас приеду все функции к рабочему виду, потом откорректирую вывод и тесты.
