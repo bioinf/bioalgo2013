@@ -2,10 +2,10 @@ def hash_t( text, length, coef = 17, module = 1000001 ):
 	if len(text) < length:
 		return None
 
-	return sum(coef**(length-1-i)*ord(text[i]) for i in xrange(length)) % module
+	return sum(pow(coef, length-1-i, module)*ord(text[i]) for i in xrange(length)) % module
 
 def hash_next( h, first, next, length, coef = 17, module = 1000001 ):
-	hnew = h - (coef**(length-1)) * ord(first)
+	hnew = h - pow(coef, length-1, module) * ord(first)
 	hnew *= coef
 	hnew += ord(next)
 	hnew %= module
