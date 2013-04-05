@@ -2,7 +2,8 @@ public class Main {
 	public static void main(String[] args) {
 		String pattern = args[0];
 		String text = args[1];
-		int n = 100;
+		//int n = 100;
+		int n = 1;
 		long time;
 		double[] results = new double[5];
 
