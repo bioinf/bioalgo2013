@@ -4,7 +4,7 @@ def brute_force(text, pattern):
 	pattern_len = len(pattern)
 
 	for i in xrange(text_len - pattern_len + 1):
-		if (text[i : i + pattern_len] == pattern):
+		if (all(text[i + j] == pattern[j] for j in xrange(pattern_len))):
 			res.append(i)
 	return res
 
