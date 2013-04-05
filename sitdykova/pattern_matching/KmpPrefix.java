@@ -1,13 +1,13 @@
 import java.util.ArrayList;
 
-public class KmpPrefix  {
+public class KmpPrefix {
 
 	private String p;
 	private String t;
 	private String sum;
 	private int[] pref;
-	
-	public KmpPrefix(String pattern, String text){
+
+	public KmpPrefix(String pattern, String text) {
 		p = pattern;
 		t = text;
 	}
@@ -22,22 +22,22 @@ public class KmpPrefix  {
 		return building(pref[k - 1], i);
 	}
 
-	public void solve() { 
+	public void solve() {
 		ArrayList<Integer> ans = new ArrayList<Integer>();
 		sum = p + "#" + t;
 		pref = new int[sum.length()];
 		pref[0] = 0;
 		for (int i = 1; i < sum.length(); i++) {
 			pref[i] = building(pref[i - 1], i);
-		}		
+		}
 		for (int i = p.length(); i < sum.length(); i++) {
 			if (pref[i] == p.length()) {
 				ans.add(i - 2 * p.length() + 1);
 			}
 		}
-		/*for (int pos : ans) {
-			System.out.print(pos + " ");
-		}
-		System.out.println(); */
+		/*
+		 * for (int pos : ans) { System.out.print(pos + " "); }
+		 * System.out.println();
+		 */
 	}
 }
