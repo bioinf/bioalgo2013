@@ -5,41 +5,15 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <time.h>
 
 using namespace std;
 
 std::ifstream fsIn("input.txt");
 std::ofstream fsOut("output.txt");
 
-struct FASTA
-{
-  struct Item
-  {
-    string Name;
-    string Sequence;
-  };
-  vector<Item> Items;
-};
-
-void ReadFASTA( FASTA &fasta )
-{
-  string s;
-  while(!cin.eof())
-  {
-    getline(std::cin, s);
-    if(s[0] == '>')
-    {
-      FASTA::Item item;
-      item.Name = s.substr(1);
-
-      fasta.Items.push_back(item);
-    }
-    else
-    {
-      fasta.Items.back().Sequence += s;
-    }
-  }
-}
+static int m[256];
 
 char RandomSymbol()
 {
@@ -57,64 +31,141 @@ char RandomSymbol()
   }
 }
 
-void GenerateRandomData(string &text, string &sample)
+void GenerateRandomData(string &haystack, string &needle, int haystack_len = 100, int needle_len = 5)
 {
-  int text_len = 100, sample_len = 5;
-  text.resize(text_len);
-  sample.resize(sample_len);
-  for(int i=0; i<text_len; ++i)
+  haystack.resize(haystack_len);
+  needle.resize(needle_len);
+  for(int i=0; i<haystack_len; ++i)
   {
-    text[i] = RandomSymbol();
+    haystack[i] = RandomSymbol();
   }
-  for(int i=0; i<sample_len; ++i)
+  for(int i=0; i<needle_len; ++i)
   {
-    sample[i] = RandomSymbol();
+    needle[i] = RandomSymbol();
   }
 }
 
-int BruteForce(const string &text, const string &sample)
+
+class MatchVisitor
 {
-  for(int i=0; i<text.size() - sample.size() + 1; ++i)
+public:
+  virtual void Visit(const string &haystack, const string &needle, int position) = 0;
+  virtual void Finished(const string &haystack, const string &needle) = 0;
+};
+
+class DummyMatchVisitor: public MatchVisitor
+{
+public:
+  void Visit(const string &haystack, const string &needle, int position) {}
+  void Finished(const string &haystack, const string &needle) {}
+};
+
+class PrinterMatchVisitor: public MatchVisitor
+{
+private:
+  int Count;
+public:
+  PrinterMatchVisitor() : Count(0) {}
+  void Visit(const string &haystack, const string &needle, int position)
+  {
+    cout << haystack << endl;
+    for(int i = 0; i < position; ++i)
+    {
+      cout << " ";
+    }
+    cout << needle << endl;
+    ++Count;
+  }
+  void Finished(const string &haystack, const string &needle)
+  {
+    cout << "Finished searching, " << Count << " matches found." << endl;
+  }
+};
+
+class VerifierMatchVisitor: public MatchVisitor
+{
+private:
+  vector<int> Matches;
+public:
+  void Visit(const string &haystack, const string &needle, int position)
+  {
+    if( position < 0 || position > haystack.size() - needle.size() )
+    {
+      cout << "Error: invalid range. position == " << position;
+    }
+    if( haystack.substr(position, needle.size()) != needle )
+    {
+      cout << "Error: invalid match\n";
+      PrinterMatchVisitor printer;
+      printer.Visit(haystack, needle, position);
+    }
+    Matches.push_back(position);
+  }
+  void Finished(const string &haystack, const string &needle)
+  {
+  }
+  bool operator == (const VerifierMatchVisitor &verifier)
+  {
+    // Assuming that the vectors are sorted
+    if(Matches.size() != verifier.Matches.size())
+        return false;
+    for(int i=0; i<Matches.size(); ++i)
+    {
+      if(Matches[i] != verifier.Matches[i])
+          return false;
+    }
+    return true;
+  }
+  bool operator != (const VerifierMatchVisitor &verifier)
+  {
+    return !operator == (verifier);
+  }
+};
+
+
+void BruteForce(const string &haystack, const string &needle, MatchVisitor &visitor)
+{
+  for(int i=0, count = haystack.size() - needle.size() + 1; i<count; ++i)
   {
     for(int j=0; ; ++j)
     {
-      if(j == sample.size())
+      if(j == needle.size())
       {
-        return i;
+        visitor.Visit(haystack, needle, i);
+        break;
       }
-      if(text[i + j] != sample[j])
+      if(haystack[i + j] != needle[j])
       {
         break;
       }
     }
   }
-  return -1;
+  visitor.Finished(haystack, needle);
 }
 
-int KMP_prefix(const string &text, const string &sample)
+void KMP_prefix(const string &haystack, const string &needle, MatchVisitor &visitor)
 {
-  vector<int> prefix(sample.size(), 0);
+  vector<int> prefix(needle.size(), 0);
 
-  int prev = 0;
-  for(int k=1; k<sample.size(); ++k)
-  {
-    for(int l=1; l<= prev+1; ++l)
-    {
-      string s1 = sample.substr(0,l);
-      string s2 = sample.substr(k-l+1,l);
-      if(s1 == s2)
-          prefix[k] = l;
-    }
-    prev = prefix[k];
+  int k = 0;
+  for(int i = 1; i < needle.size(); ++i)
+  {          
+    while( (k > 0) && (needle[k] != needle[i]) ) 
+        k = prefix[k-1]; 
+    if (needle[k] == needle[i])
+        k++;
+    prefix[i] = k;
   }
 
-  for(int i=0, j=0; i<text.size() - sample.size() + 1; )
+  for(int i=0, j=0, count=(haystack.size() - needle.size() + 1); i < count; )
   {
-    if(j == sample.size())
+    if(j == needle.size())
     {
-      return i;
+      visitor.Visit(haystack, needle, i);
+      ++i;
+      j=0;
     }
-    if(text[i + j] == sample[j])
+    if(haystack[i + j] == needle[j])
     {
       ++j;
     }
@@ -126,11 +177,12 @@ int KMP_prefix(const string &text, const string &sample)
       }
       else
       {
-        //sample[0, j-1] == text[i, i+j-1]
-        if(prefix[j-1] != 0)
+        //note: needle[0, j-1] == haystack[i, i+j-1]
+        int p = prefix[j-1];
+        if(p != 0)
         {
-          i += j - prefix[j-1];
-          j = prefix[j-1];
+          i += j - p;
+          j = p;
         }
         else
         {
@@ -141,107 +193,356 @@ int KMP_prefix(const string &text, const string &sample)
     }
   }
 
-  return -1;
+  visitor.Finished(haystack, needle);
 }
 
-int Z_function(const string &text, const string &sample)
+void Z_function(const string &haystack, const string &needle, MatchVisitor &visitor)
 {
-  vector<int> Z(sample.size() + 1 + text.size(), 0);
-  for(int i=1; i<Z.size(); ++i)
-  {
-    Z[i] = 0;
-  }
+  vector<int> Z(needle.size() + 1 + haystack.size(), 0);
   Z[0] = Z.size();
 
-  string str = sample + "$" + text;
+  string str = needle + "$" + haystack;
 
-  for( int curr = 1, left = 0, right = 1; curr < Z.size(); ++curr )
+  for( int curr = 1, left = 0, right = 0, j = 0; curr < Z.size(); ++curr )
   {
-    if( curr >= right )
+    if( curr > right )
     {
-      int off = 0;
-      while( curr + off < Z.size() && str[curr + off] == str[off] )
-          ++off;
-      Z[curr] = off;
-      if(Z[curr] == sample.size())
-          return curr - sample.size() - 1;
-      right = curr + Z[curr];
+      for(j = 0; ((j + curr) < Z.size()) && (str[curr + j] == str[j]) ; ++j);
+      Z[curr] = j;
       left = curr;
+      right = curr + j - 1;
     }
     else
     {
-      const size_t equiv = curr - left;
-      if( Z[equiv] < right - curr )
-      {
-        Z[curr] = Z[equiv];
-      }
+      if(curr + Z[curr - left] < right + 1)
+          Z[curr] = Z[curr - left];
       else
       {
-        size_t off = 0;
-        while( right + off < Z.size() && str[right - curr + off] == str[right + off] )
-            ++off;
-        Z[curr] = right - curr + off;
-        right += off;
+        for(j = 1; (str[right + j] == str[right - curr + j]) && ((j + right) < Z.size()); ++j);
+        Z[curr] = right - curr + j;
         left = curr;
+        right += j - 1;
+      }
+    }
+
+    if(Z[curr] == needle.size())
+    {
+      visitor.Visit(haystack, needle, curr - needle.size() - 1);
+    }
+  }
+
+  visitor.Finished(haystack, needle);
+}
+
+void RabinKarp_NoChecks(const string &haystack, const string &needle, MatchVisitor &visitor)
+{
+  int h = 0;
+  const int p = 401;//524287;
+  const int d = 4;
+
+  if(haystack.size() >= needle.size())
+  {
+    int h1 = 0;
+    int D = 1;
+    for(int i=0; i<needle.size(); ++i)
+    {
+      h = (h*d + m[needle[i]]) % p;
+      h1 = (h1*d + m[haystack[i]]) % p;
+      D = D*d % p;
+    }
+
+    if(h == h1)
+    {
+      visitor.Visit(haystack, needle, 0);
+    }
+
+    for(int ii=needle.size(); ii<haystack.size(); ++ii)
+    {
+      h1 *= d;
+      h1 -= D * m[haystack[ii-needle.size()]];
+      if(h1 < 0)
+        h1 += p;
+      h1 += m[haystack[ii]];
+      h1 %= p;
+      if(h == h1)
+      {
+        visitor.Visit(haystack, needle, ii - needle.size() + 1);
       }
     }
   }
 
+  visitor.Finished(haystack, needle);
+} 
 
-
-
-  return -1;
-}
-
-int RabinKarp(const string &text, const string &sample)
+void RabinKarp_WithChecks(const string &haystack, const string &needle, MatchVisitor &visitor)
 {
-  int h = 0;
-  static int m[256];
-  m['A'] = 0; m['C'] = 1; m['G'] = 2; m['T'] = 3;
-  const int p = 524287;
-  const int d = 4;
-
-  if(text.size() < sample.size())
-      return -1;
-
-  int h1 = 0;
-  int D = 1;
-  for(int i=sample.size()-1; i>=0; --i)
+  class CheckDecoratorMatchVisitor: public MatchVisitor
   {
-    h = (h*d + m[sample[i]]) % p;
-    h1 = (h1*d + m[text[i]]) % p;
-    D = D*d % p;
-  }
+  private:
+    MatchVisitor &DecoratedVisitor;
 
-  if(h == h1)
-  {
-    //check...
-    return 0;
-  }
-
-  for(int i=sample.size(); i<text.size(); ++i)
-  {
-    h1 /= d;
-    h1 = (h1 + m[text[i]]*D/d) % p;
-    if(h == h1)
+    void Visit(const string &haystack, const string &needle, int position)
     {
-      //check...
-      return i - sample.size() + 1;
+      // Assuming that the position is valid
+      if( haystack.substr(position, needle.size()) == needle )
+      {
+        DecoratedVisitor.Visit(haystack, needle, position);
+      }
+    }
+    void Finished(const string &haystack, const string &needle)
+    {
+      DecoratedVisitor.Finished(haystack, needle);
+    }
+  public:
+    CheckDecoratorMatchVisitor(MatchVisitor &decoratedVisitor) : DecoratedVisitor(decoratedVisitor) {}
+  };
+
+  RabinKarp_NoChecks(haystack, needle, CheckDecoratorMatchVisitor(visitor));
+} 
+
+void BoyerMoore_StopSymbol(const string &haystack, const string &needle, MatchVisitor &visitor)
+{
+  int STOP[4] = {0, 0, 0, 0};
+  for(int i = needle.size() - 2; i >= 0; --i)
+  {
+    int ind = m[needle[i]];
+    STOP[ind] = max(STOP[ind], i+1);
+  }
+
+
+  for(int i=0; i<haystack.size() - needle.size() + 1; ++i)
+  {
+    for(int j=needle.size() - 1; ; --j)
+    {
+      if(j < 0)
+      {
+        visitor.Visit(haystack, needle, i);
+        break;
+      }
+      if(haystack[i + j] != needle[j])
+      {
+        if(j == needle.size() - 1)
+        {
+          int stop_symbol = STOP[m[haystack[i+j]]];
+          int stop_symbol_additional = j - (stop_symbol != 0 ? stop_symbol : 0);
+          i += stop_symbol_additional;
+        }
+        else
+        {
+          
+        }
+        break;
+      }
     }
   }
-
-  return -1;
+  visitor.Finished(haystack, needle);
 }
 
-bool Check(const string &text, const string &sample, int pos)
+void BoyerMoore_Suffix(const string &haystack, const string &needle, MatchVisitor &visitor)
 {
-  if(pos == -1)
+  int STOP[4] = {0, 0, 0, 0};
+  for(int i = needle.size() - 2; i >= 0; --i)
   {
-    return text.find(sample) == string::npos;
+    int ind = m[needle[i]];
+    STOP[ind] = max(STOP[ind], i+1);
   }
-  return text.substr(pos, sample.size()) == sample;   
+
+
+  vector<int> prefix(needle.size(), 0);
+  int k = 0;
+  for(int i = 1; i < needle.size(); ++i)
+  {          
+    while( (k > 0) && (needle[k] != needle[i]) ) 
+        k = prefix[k-1]; 
+    if (needle[k] == needle[i])
+        k++;
+    prefix[i] = k;
+  }
+
+  string needle1; needle1.resize(needle.size());
+  for(int i=0; i<needle.size(); ++i)
+  {
+    needle1[i] = needle[needle.size() - i - 1];
+  }
+  vector<int> prefix1(needle1.size(), 0);
+  k = 0;
+  for(int i = 1; i < needle.size(); ++i)
+  {          
+    while( (k > 0) && (needle1[k] != needle1[i]) ) 
+        k = prefix[k-1]; 
+    if (needle1[k] == needle1[i])
+        k++;
+    prefix1[i] = k;
+  }
+
+  vector<int> suffshift(needle.size()+1);
+  for(int j = 0; j<needle.size(); ++j)
+  {
+    suffshift[j] = needle.size() - prefix[j];
+  }
+  for(int i = 1; i<needle.size(); ++i)
+  {
+    int j = needle.size() - prefix1[i];
+    suffshift[j] = min(suffshift[j], i - prefix1[i]);
+  }
+
+
+  vector<int> suffics_table(needle.size()+1);
+  for(int i = 0; i <= needle.length(); ++i)
+  {
+    suffics_table[i] = needle.length() - prefix.back();
+  }
+  for(int i = 1; i < needle.length(); ++i)
+  {
+    int j = prefix1[i];
+    suffics_table[j] = min(suffics_table[j], i - prefix1[i] + 1);
+  }
+
+
+
+  for(int i=0; i<haystack.size() - needle.size() + 1; ++i)
+  {
+    for(int j=needle.size() - 1; ; --j)
+    {
+      if(j < 0)
+      {
+        visitor.Visit(haystack, needle, i);
+        break;
+      }
+      if(haystack[i + j] != needle[j])
+      {
+        if(j == needle.size() - 1)
+        {
+          int stop_symbol = STOP[m[haystack[i+j]]];
+          int stop_symbol_additional = j - (stop_symbol != 0 ? stop_symbol : 0);
+          i += stop_symbol_additional;
+        }
+        else
+        {
+          i += suffics_table[needle.length() - j - 1] - 1;      
+        }
+        break;
+      }
+    }
+  }
+  visitor.Finished(haystack, needle);
 }
 
+
+class TTimer
+{
+public:
+  typedef void (*TimerFunc)( long mSec );
+private:
+  clock_t StartedAt;
+  TimerFunc Func;
+public:
+  TTimer( TimerFunc f )
+    : Func(f)
+  {
+    StartedAt = clock();
+  }
+  ~TTimer()
+  {
+    Func( (clock() - StartedAt) / (CLOCKS_PER_SEC/1000) );
+  }
+};
+
+void PrintMSec( long mSec )
+{
+  cout << mSec << " msec" << endl;
+}
+
+void CompeteSample(const string &title, const string &haystack, const string &needle, int num)
+{
+  VerifierMatchVisitor verifier1;
+  VerifierMatchVisitor verifier2;
+  VerifierMatchVisitor verifier3;
+  VerifierMatchVisitor verifier4;
+  VerifierMatchVisitor verifier5;
+  VerifierMatchVisitor verifier6;
+  BruteForce(haystack, needle, verifier1);
+  KMP_prefix(haystack, needle, verifier2);
+  Z_function(haystack, needle, verifier3);
+  RabinKarp_WithChecks(haystack, needle, verifier4);
+  BoyerMoore_StopSymbol(haystack, needle, verifier5);
+  BoyerMoore_Suffix(haystack, needle, verifier6);
+  if(verifier1 != verifier2 || verifier2 != verifier3 || verifier3 != verifier4 || verifier4 != verifier5 || verifier5 != verifier6)
+  {
+    cout << "Ooopps!" << endl;
+    return;
+  }
+
+  cout << "\t" << title << endl;
+  //cout << "haystack == " << haystack << endl;
+  //cout << "needle == " << needle << endl;
+
+
+  {
+    cout << "Brute Force: \t\t\t";
+    TTimer timer(PrintMSec);
+    for(int j = 0; j<num; ++j)
+    {
+      DummyMatchVisitor dummy;
+      BruteForce(haystack, needle, dummy);
+    }
+  }
+  {
+    cout << "KMP: \t\t\t\t";
+    TTimer timer(PrintMSec);
+    for(int j = 0; j<num; ++j)
+    {
+      DummyMatchVisitor dummy;
+      KMP_prefix(haystack, needle, dummy);
+    }
+  }
+  {
+    cout << "Z-function: \t\t\t";
+    TTimer timer(PrintMSec);
+    for(int j = 0; j<num; ++j)
+    {
+      DummyMatchVisitor dummy;
+      Z_function(haystack, needle, dummy);
+    }
+  }
+/*  {
+    cout << "Rabin-Karp, no checks: \t\t";
+    TTimer timer(PrintMSec);
+    for(int j = 0; j<num; ++j)
+    {
+      DummyMatchVisitor dummy;
+      RabinKarp_NoChecks(haystack, needle, dummy);
+    }
+  }*/
+  {
+    cout << "Rabin-Karp, with checks: \t";
+    TTimer timer(PrintMSec);
+    for(int j = 0; j<num; ++j)
+    {
+      DummyMatchVisitor dummy;
+      RabinKarp_WithChecks(haystack, needle, dummy);
+    }
+  }
+  {
+    cout << "Boyer-Moore, Stop symbol: \t";
+    TTimer timer(PrintMSec);
+    for(int j = 0; j<num; ++j)
+    {
+      DummyMatchVisitor dummy;
+      BoyerMoore_StopSymbol(haystack, needle, dummy);
+    }
+  }
+  {
+    cout << "Boyer-Moore, Suffix: \t\t";
+    TTimer timer(PrintMSec);
+    for(int j = 0; j<num; ++j)
+    {
+      DummyMatchVisitor dummy;
+      BoyerMoore_Suffix(haystack, needle, dummy);
+    }
+  }
+  cout << endl;
+}
 
 int main(int argc, char* argv[])
 {
@@ -251,54 +552,41 @@ int main(int argc, char* argv[])
   }
   std::cin.rdbuf( fsIn.rdbuf() );
 
-  for(int i=0; i<1000; ++i)
-  {
-    string text, sample;
+  // Prepare for Rabin-Karp and Boyer-Moore:
+  m['A'] = 0; m['C'] = 1; m['G'] = 2; m['T'] = 3;
 
-    GenerateRandomData(text, sample);
-    int i1 = BruteForce(text, sample);
-    int i2 = KMP_prefix(text, sample);
-    int i3 = Z_function(text, sample);
-    int i4 = RabinKarp(text, sample);
-    if(i1 != i2 || i2 != i3 || i3 != i4)
-    {
-      cout << "error: different results" << endl;
-      break;
-    }
-    else
-    {
-      cout << i << " success, " << i1 << endl;
-    }
-    if(!Check(text, sample, i1))
-    {
-      cout << "error: template doesn't match" << endl;
-      break;
-    }
+  CompeteSample("Brute Force benefit",
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+                100000);
+  CompeteSample("KMP benefit",
+                "AAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAC",
+                "AAAAAAAAAAAAAAAAAAAAAAAC",
+                100000);
+  CompeteSample("Rabin-Karp benefit",
+                "ATCGGAGTCGAGATCGGAGTCGAGATCGGAGTCGAGATCGGAGTCGAGATCGGAGTCGAGATCGGAGTCGAGATCGGAGTCGAGATCGGAGTCGAG",
+                "ATCGGAGTCGAGT",
+                100000);
+
+  for(int i=0; i<100; ++i)
+  {
+    string haystack, needle;
+
+    GenerateRandomData(haystack, needle, 10000, 20);                                                                                                                                                    //
+
+    //BruteForce(haystack, needle, PrinterMatchVisitor());
+    //KMP_prefix(haystack, needle, PrinterMatchVisitor());
+    //Z_function(haystack, needle, PrinterMatchVisitor());
+    //RabinKarp_WithChecks(haystack, needle, PrinterMatchVisitor());
+    //BoyerMoore_StopSymbol(haystack, needle, PrinterMatchVisitor());
+    //BoyerMoore_Suffix(haystack, needle, PrinterMatchVisitor());
+
+    stringstream ss;
+    ss << string("Random test ") << i;
+    CompeteSample(ss.str(), haystack, needle, 1000);
   }
 
-
-
-/*  vector<int> result(dna.size(), 0);
-
-  int prev = 0;
-  for(int k=1; k<dna.size(); ++k)
-  {
-    for(int l=1; l<= prev+1; ++l)
-    {
-      string s1 = dna.substr(0,l);
-      string s2 = dna.substr(k-l+1,l);
-      if(s1 == s2)
-          result[k] = l;
-    }
-    prev = result[k];
-  }
-
-  for(vector<int>::iterator iter = result.begin(); iter != result.end(); ++iter)
-  {
-    cout << *iter << " ";
-    fsOut << *iter << " ";
-  }*/
-
+  for(;;);
 	return 0;
 }
 
