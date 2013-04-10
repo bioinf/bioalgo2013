@@ -20,9 +20,11 @@ public class BruteForce {
 				ans.add(i + 1);
 			}
 		}
+
 		/*
 		 * for (int pos : ans) { System.out.print(pos + " "); }
 		 * System.out.println();
 		 */
+
 	}
 }
