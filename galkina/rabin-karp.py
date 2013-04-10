@@ -27,5 +27,3 @@ def rabin_karp (string, sub):
 				elif i == m-1:
 					result.append(k)
 	return result
-
-print rabin_karp('abcdefdede', 'de')
