@@ -5,6 +5,8 @@
  * Time: 13:56
  * To change this template use File | Settings | File Templates.
  */
+import com.sun.deploy.util.ArrayUtil;
+
 import java.util.*;
 import java.io.*;
 public class Strstr {
@@ -169,12 +171,12 @@ public class Strstr {
                     shift=nextRight(arrChar,text.charAt(i+j),j); //Считаем нужный сдвиг
                     if(shift == -1)
                     {
-                        i+=pattern.length()-1; //Буква не встретилась, сдвигаем на весь шаблон
+                        i+=j-1;
                         break;
                     }
                     else
                     {
-                        i+=pattern.length()-shift-2;
+                        i+= j - shift-1;
                         break;
                     }
                 }
@@ -184,32 +186,53 @@ public class Strstr {
     }
     public static ArrayList<Integer> galilRule(String text,String pattern)
     {
-      ArrayList<Integer> result=new ArrayList<Integer>();
-      int[] z = zFunction(pattern);
-      int k=0;
-      for(int i=0; i<text.length()-pattern.length()-1;i++)
-      {
-          for(int j=pattern.length()-1;j>=k;j--)
-          {
-             if(pattern.charAt(j) == text.charAt(i+j))
-             {
-                if(j == 0)
-                    result.add(i);
-             }
-             else
-             {
-                 k=(j+1==pattern.length())?0:z[j+1];
-                 i+=pattern.length()-1-k;
-                 break;
-             }
-          }
-      }
+        ArrayList<Integer> result = new ArrayList<Integer>();
+        int shift,next;
+        //Список для поиска правых вхождений
+        List<Integer>[] arrChar = new List[4];
+        for(int i = 0 ; i < 4 ; i++ )
+            arrChar[i] = new ArrayList<Integer>();
+        //Препроцессинг
+        for(int i = pattern.length() - 1 ; i >= 0 ; i-- )
+            arrChar[ convert( pattern.charAt(i) ) - 1 ].add(i);
+        int[] z=zFunction(new StringBuffer(pattern).reverse().toString());
+        int [] L = new int[ pattern.length() ];
+        for (int j = 0; j < pattern.length(); j++ ) {
+            if(z[pattern.length() - j - 1] != 0)
+            {
+                int i = pattern.length() - z[pattern.length() - j - 1];
+                L[i] = j;
+            }
+        }
+        for(int i=0;i<text.length()-pattern.length()+1;i++)
+        {
+            int right=-1;
+            for(int j=pattern.length()-1; j >=0;j--)
+            {
+                if( j == right)
+                {
+                    j-=z[pattern.length() - j - 1];
+                    right=-1;
+                }
+                else{
+                    if(pattern.charAt(j) == text.charAt(i+j)){  //Полное вхождение
+                        if(j == 0) result.add(i);
+                    }
+                    else
+                    {
+                        shift=( pattern.length() - 1 ) != j ? pattern.length() - 2 - L[j+1] : 0;
+                        right=shift+pattern.length()+1;
+                        i+=shift;
+                        break;
+                    }
+                }
+            }
+        }
 
       return result;
     }
-
     public static int correct (ArrayList<Integer> a,ArrayList<Integer> b, ArrayList<Integer> c,
-                               ArrayList<Integer> d, ArrayList<Integer> e,ArrayList<Integer> u )
+                          ArrayList<Integer> d, ArrayList<Integer> e,ArrayList<Integer> u )
     {
         int flag=0;
         if(a.size() != b.size() && a.size() != b.size() && a.size() != c.size() &&
@@ -221,10 +244,6 @@ public class Strstr {
         return flag;
     }
 
-    public static void test()
-    {
-
-    }
 
     public static void main(String[] arg) throws IOException
     {
@@ -257,7 +276,7 @@ public class Strstr {
                 bc=badCharacterRule(text,pattern);
                 result[4]+=(System.currentTimeMillis()-time);
                 time = System.currentTimeMillis();
-                //gc=galilRule(text,pattern);
+                gc=galilRule(text,pattern);
                 result[5]+=(System.currentTimeMillis()-time);
             }
             output.write("bruteForce: " + (result[0]) + " ms \n");
@@ -267,6 +286,7 @@ public class Strstr {
             output.write("badCharacterRule: "+(result[4])+" ms \n");
             output.write("galilRule: "+(result[5])+" ms \n");
             output.write("The total length: text "+text.length()*1000+" patter "+pattern.length()*1000+" \n ********************************************************************** \n");
+
 
         }
         output.close();

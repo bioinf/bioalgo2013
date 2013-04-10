@@ -1,40 +1,40 @@
 Test string: TCGTTTAACCCATCGTTCATCGTTCATCGTTCATCGTTCATCGTTCATCGTTCATCGTTCATCGTTTCGTCATCGTT 
  pattern: TCGT 
-bruteForce: 20 ms 
+bruteForce: 41 ms 
 pefixFunction: 7 ms 
-kMPZ: 7 ms 
-rabKarp: 16 ms 
-badCharacterRule: 32 ms 
-galilRule: 0 ms 
+kMPZ: 12 ms 
+rabKarp: 20 ms 
+badCharacterRule: 23 ms 
+galilRule: 8 ms 
 The total length: text 77000 patter 4000 
  ********************************************************************** 
 Test string: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 
  pattern: AAAAAA 
-bruteForce: 10 ms 
-pefixFunction: 9 ms 
-kMPZ: 4 ms 
-rabKarp: 12 ms 
-badCharacterRule: 10 ms 
-galilRule: 0 ms 
+bruteForce: 5 ms 
+pefixFunction: 11 ms 
+kMPZ: 3 ms 
+rabKarp: 21 ms 
+badCharacterRule: 5 ms 
+galilRule: 13 ms 
 The total length: text 185000 patter 6000 
  ********************************************************************** 
 Test string: ATGTTGATGTGATCCTATCATCTACTGATGCTGCATGCATGCTACGATGCTAGCATCGATCGATCGCTAGCATGCATGCATGCTAGCTACGATGCATGCATGCATGCTAGCTAGCATCGATGCATCGATCGATCGATCTGCATCGATGCTAGCTCGCTGTGCTGCTACGTAGCTAGCTACGCTAGCTGTAGCTAGCTACGATGCTAGCTCGTAGCTACGTACGATGCTACGTAGCGATTGCAGTCGATGCTACGTCAGCT 
  pattern: CATCTAC 
-bruteForce: 6 ms 
-pefixFunction: 2 ms 
-kMPZ: 7 ms 
-rabKarp: 7 ms 
-badCharacterRule: 0 ms 
-galilRule: 0 ms 
+bruteForce: 8 ms 
+pefixFunction: 1 ms 
+kMPZ: 3 ms 
+rabKarp: 6 ms 
+badCharacterRule: 3 ms 
+galilRule: 6 ms 
 The total length: text 260000 patter 7000 
  ********************************************************************** 
 Test string: TTTTTTTTTTTCCTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTCCTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTC 
  pattern: TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTCCCCCC 
-bruteForce: 9 ms 
-pefixFunction: 1 ms 
-kMPZ: 5 ms 
-rabKarp: 2 ms 
-badCharacterRule: 1 ms 
-galilRule: 0 ms 
+bruteForce: 12 ms 
+pefixFunction: 2 ms 
+kMPZ: 4 ms 
+rabKarp: 7 ms 
+badCharacterRule: 0 ms 
+galilRule: 8 ms 
 The total length: text 172000 patter 126000 
  ********************************************************************** 
