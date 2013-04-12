@@ -1,11 +1,12 @@
 from kmp import kmp_prefix, kmp_z
 from brute_force import brute_force
 from rabin_karp import rabin_karp
+from boyer_moore import boyer_moore
 import random
 import sys
 import time
 
-func = [brute_force, kmp_prefix, kmp_z, rabin_karp]
+func = [brute_force, kmp_prefix, kmp_z, rabin_karp, boyer_moore]
 
 def random_string(n, alphabet):
 	return "".join(random.choice(alphabet) for i in xrange(n))
