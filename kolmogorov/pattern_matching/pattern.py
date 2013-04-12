@@ -4,6 +4,7 @@ import random
 import time
 import numpy as np
 import algorithms as alg
+import boyer_moore as bm
 import string
 
 def measure(f, *args):
@@ -39,7 +40,9 @@ def check_fail():
 		if not (alg.kmp(text, pattern) == 
 				alg.karp(text, pattern) == 
 				alg.naive(text, pattern) == 
-				alg.z_find(text, pattern)):
+				alg.z_find(text, pattern) ==
+				bm.boyer_moore(text, pattern)):
+			print alg.naive(text, pattern), bm.boyer_moore(text, pattern)
 			fail_flag = True
 
 	if fail_flag:
@@ -49,9 +52,10 @@ def check_fail():
 
 def union_find(text, pattern):
 	print "Pattern: {0}\nText: {1}\n".format(pattern, text)
-	print ("Running time: \nNaive: {0}\nKMP: {1}\nZ-function: {2}\nRabin-Karp: {3}\n"
+	print ("Running time: \nNaive: {0}\nKMP: {1}\nZ-function: {2}\nRabin-Karp: {3}\nBoyer-Moore: {4}\n"
 			.format(measure(alg.naive, text, pattern), measure(alg.kmp, text, pattern),
-					measure(alg.z_find, text, pattern), measure(alg.karp, text, pattern)))
+					measure(alg.z_find, text, pattern), measure(alg.karp, text, pattern),
+					measure(bm.boyer_moore, text, pattern)))
 
 def main():
 	print "=================\nKMP is best:\n==============="
