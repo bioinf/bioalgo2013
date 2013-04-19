@@ -1,0 +1,40 @@
+Bruteforce method:
+
+Text too long for display...
+
+Pattern matching positions in text:
+74 2321 6374 8728 
+Computation time: 0.0003439
+
+
+
+KMP with z-function method:
+
+Text too long for display...
+
+Pattern matching positions in text:
+74 2321 6374 8728 
+Computation time: 0.00038071
+
+
+
+KMP with prefix-function method:
+
+Text too long for display...
+
+Pattern matching positions in text:
+74 2321 6374 8728 
+Computation time: 0.00039873
+
+
+
+Rabin-Carp method:
+
+Text too long for display...
+
+Pattern matching positions in text:
+74 2321 6374 8728 
+Computation time: 0.00045788
+
+
+
