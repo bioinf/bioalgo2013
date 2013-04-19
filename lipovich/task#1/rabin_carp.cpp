@@ -16,7 +16,7 @@ TResult rabin_carp(const std::string& p, const std::string& t)
 {
     int n = p.size(), m = t.size();
 
-    int hash_p = 0, hash_t = 0, g = 1;
+    long long hash_p = 0, hash_t = 0, g = 1;
 
     TResult res;
 
@@ -25,13 +25,10 @@ TResult rabin_carp(const std::string& p, const std::string& t)
     {
         hash_p = (a * hash_p + (int)p[i]) % 31;
 
-        hash_t = (a * hash_t + (int)t[i]) % 31 ;
+        hash_t = (a * hash_t + (int)t[i]) % 31;
 
-        g *= a;
+        g = (a * g) % 31;
     }
-
-
-    g %= 31;
 
     for (int i = 0; i < m - n + 1; ++i)
     {
@@ -39,10 +36,9 @@ TResult rabin_carp(const std::string& p, const std::string& t)
         if (hash_p == hash_t && check(p, t, i, n))
         {
             res.push_back(i);
-            std::cout << i << std::endl;
         }
 
-        hash_t = ((a * hash_t) % 31- g * (int)t[i] + (int)t[i + n]) % 31;
+        hash_t = (a * hash_t - (g * (int)t[i]) % 31 + (int)t[i + n]) % 31;
     }
 
     return res;

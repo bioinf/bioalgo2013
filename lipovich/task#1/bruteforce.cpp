@@ -18,7 +18,6 @@ TResult bruteforce(const std::string& p, const std::string& t)
        if (j == n)
        {
             res.push_back(i);
-            std::cout << i << std::endl;
        }
     }
 
