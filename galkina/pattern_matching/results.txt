@@ -1,0 +1,70 @@
+
+
+Best results for brute-force:
+string: feefaeg...fbbf
+substring: abdf
+
+brute_force:
+mean is 1397.59032123 us (996 solid timings, 4 outliers)
+kmp_prefix:
+mean is 2000.0029963 us (846 solid timings, 154 outliers)
+kmp_z:
+mean is 1999.99978674 us (957 solid timings, 43 outliers)
+rabin_karp:
+mean is 2253.9999485 us (1000 solid timings, 0 outliers)
+
+
+Worse results for brute-force:
+string: aaaaaaa...aaab
+substring: aaab
+
+brute_force:
+mean is 7999.99918256 us (791 solid timings, 209 outliers)
+kmp_prefix:
+mean is 3000.02098083 us (810 solid timings, 190 outliers)
+kmp_z:
+mean is 3999.94850159 us (600 solid timings, 400 outliers)
+rabin_karp:
+mean is 1999.99967846 us (872 solid timings, 128 outliers)
+
+
+Best results for Rabin-Karp:
+string: aaaaaaa...aaab
+substring: aaab
+
+brute_force:
+mean is 7999.99940903 us (752 solid timings, 248 outliers)
+kmp_prefix:
+mean is 3000.02098083 us (710 solid timings, 290 outliers)
+kmp_z:
+mean is 3594.59467478 us (999 solid timings, 1 outliers)
+rabin_karp:
+mean is 2000.00119536 us (876 solid timings, 124 outliers)
+
+
+Worse results for Rabin-Karp:
+string: abababa...abab
+substring: baba
+
+brute_force:
+mean is 4359.00020599 us (1000 solid timings, 0 outliers)
+kmp_prefix:
+mean is 3000.02098083 us (832 solid timings, 168 outliers)
+kmp_z:
+mean is 3450.0002861 us (1000 solid timings, 0 outliers)
+rabin_karp:
+mean is 6000.04196167 us (702 solid timings, 298 outliers)
+
+
+Best results for KMP:
+string: aaaaaaa...aaaa
+substring: aaaa
+
+brute_force:
+mean is 8000.00043678 us (869 solid timings, 131 outliers)
+kmp_prefix:
+mean is 4000.00073338 us (671 solid timings, 329 outliers)
+kmp_z:
+mean is 4263.00001144 us (1000 solid timings, 0 outliers)
+rabin_karp:
+mean is 7704.99968529 us (1000 solid timings, 0 outliers)
