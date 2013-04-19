@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <ctime>
+#include <time.h>
 
 #include "kmp.h"
 #include "bruteforce.h"
@@ -47,6 +47,11 @@ int* compute_prefix_function(const string& s)
 
     int* p = new int[len];
 
+    for (int i = 0; i < len; ++i)
+	{
+	    p[i] = 0;
+	}
+
     p[0] = 0;
     int k = 0;
 
@@ -73,6 +78,11 @@ int* compute_z_function (const string& s)
 	int n = (int) s.length();
 
 	int* z = new int[n];
+
+	for (int i = 0; i < n; ++i)
+	{
+	    z[i] = 0;
+	}
 
 	for (int i = 1, l = 0, r = 0; i < n; ++i)
 	{
@@ -104,7 +114,7 @@ int main()
 
     int* (*fptr)(const string&);
 //
-      std::clock_t begin, end;
+    clock_t begin, end;
 //
     begin = clock();
 
@@ -112,9 +122,11 @@ int main()
 
     end = clock();
 
-    double diff0 = double(end - begin) / CLOCKS_PER_SEC;
+    double diff0 = (double(end) - double(begin)) / CLOCKS_PER_SEC;
 
     log_res("Bruteforce", p, t, diff0, brut);
+
+    std::cout << "bruteforced" << " " << diff0 << std::endl;
 
 
     //////////////////////
@@ -127,9 +139,11 @@ int main()
 
     end = clock();
 
-    double diff1 = double(end - begin) / CLOCKS_PER_SEC;
+    double diff1 = (double(end) - double(begin)) / CLOCKS_PER_SEC;
 
     log_res("KMP with z-function", p, t, diff1, kmpz);
+
+    std::cout << "kmpz" << " " << diff1 << std::endl;
 
     //////////////////////
 
@@ -141,9 +155,11 @@ int main()
 
     end = clock();
 
-    double diff2 = double(end - begin) / CLOCKS_PER_SEC;
+    double diff2 =(double(end) - double(begin)) / CLOCKS_PER_SEC;
 
     log_res("KMP with prefix-function", p, t, diff2, kmpp);
+
+    std::cout << "kmpp" << std::endl;
 
     //////////////////////
 
@@ -154,9 +170,11 @@ int main()
 
     end = clock();
 
-    double diff3 = double(end - begin) / CLOCKS_PER_SEC;
+    double diff3 = (double(end) - double(begin)) / CLOCKS_PER_SEC;
 
     log_res("Rabin-Carp", p, t, diff3, rc);
+
+    std::cout << "rc" << std::endl;
 
     return 0;
 }
