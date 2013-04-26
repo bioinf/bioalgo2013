@@ -63,10 +63,10 @@ def boyer_moore(text, pattern):
 	while k < len(text):
 		i = len(pattern) - 1
 		h = k
-		while i >= 0 and text[h] == pattern[i]:
+		while i >= 0 and text[h] == pattern[i] and h > prev_k:
 			i -= 1
 			h -= 1
-		if i == -1: 	#match
+		if i == -1 or h == prev_k: 	#match
 			matches.append(k - len(pattern) + 1)
 			k += len(pattern) - suff_fail[1] if len(pattern) > 1 else 1
 		else: 						#missmatch
@@ -74,9 +74,9 @@ def boyer_moore(text, pattern):
 			if i == len(pattern) - 1:
 				suff_shift = 1
 			elif suff_main[i + 1] != -1:
-				suff_shift = len(pattern) - 1 - suff_main[i + 1]
+				suff_shift = len(pattern) - suff_main[i + 1] - 1
 			else:
-				suff_shift = len(pattern) - 1 - suff_fail[i + 1]
+				suff_shift = len(pattern) - suff_fail[i + 1]
 			#bad character
 			char_shift = i - bad_char(text[h], i)
 			shift = max(char_shift, suff_shift)

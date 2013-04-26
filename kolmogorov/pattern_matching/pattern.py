@@ -43,6 +43,7 @@ def check_fail():
 				alg.z_find(text, pattern) ==
 				bm.boyer_moore(text, pattern)):
 			print alg.naive(text, pattern), bm.boyer_moore(text, pattern)
+			print text, pattern
 			fail_flag = True
 
 	if fail_flag:
@@ -64,9 +65,12 @@ def main():
 	union_find("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab", "aaaaaaaaa")
 	print "=================\nNaive is best:\n============="
 	union_find("abcdefghjklmnopqrstuvwxyz", "wwwwwwww")
+	print "=================\nBoyer-Moore is best:\n============="
+	union_find("ACCCGGGCCTAGGACAAGGAACCTTTGGAGGAGGCTTAGCCGCCCCCTTAGAGGACCAT"+
+				"ACGTAGATCAGCATGCATCATATAGCAGATACGACGATTAGACGGATAGGACGAATACAG"+
+				"AGCTTACCATTACGCCGACTACTGCACTACGCCGATCAGACCGAGATATAGACGACATAG", "ACGTAGTGT")
 
 	print check_fail()
-
 
 if __name__ == "__main__":
 	main()
