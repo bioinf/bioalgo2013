@@ -1,4 +1,7 @@
-import java.util.ArrayList;
+import com.sun.jmx.snmp.SnmpScopedPduRequest;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -8,58 +11,97 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 
-class Vertex {
-    public char letter;
-    public Tria link;
-
-    Vertex(char a, Tria b) {
-        letter = a;
-        link = b;
+class Node {
+    public Node[] son;    // Список сыновей
+    public Node go;
+    public Node suffixLink;
+    public Node parent;  // ссылка на родителя
+    public boolean end;  // терменатор
+    public int num; //Нумерация вершины
+    public char charToParent; // Буква в вершине
+    Node(int countSon)
+    {
+        son = new Node[countSon];
     }
 }
 
-//Вершина бора.
-class Tria {
-    public int num;  // Номер указывает на конец i слова в этой вершине.
-    public ArrayList<Vertex> arrChar = new ArrayList<Vertex>();
+class Tree {
+    public int countNode;
+    private Node root;
+    private int powerAlp;
 
-    Tria(int n) {
-        num = n;
+    Tree() {
+        this.powerAlp = 80;
+        this.countNode = 1;
+        this.root = new Node(this.powerAlp);
+        this.root.num = 0;
+    }
+
+    public Node searchLink(Node u,char a){
+
+        int index = (int)(a - 'a');
+        if( u == root)
+            return root;
+        if( u.suffixLink.son[index] != null)
+        {
+            return u.suffixLink.son[index];
+        }
+        else
+        {
+            return searchLink(u.parent,a);
+        }
+
+    }
+    public void buildSuffixLink()
+    {
+        Queue<Node> nodeQueue = new LinkedList<Node>();
+        // Создали ссылки на корень для 1 уровня вершин, и добавили их в очередь
+        for(int i = 0; i < this.powerAlp ; i++)
+        {
+            if(root.son[i] != null)
+            {
+                root.son[i].suffixLink = root;
+                nodeQueue.add(root.son[i]);
+            }
+        }
+        //Производим обход в ширину
+        while (nodeQueue.size() != 0)
+        {
+            Node qeNode = nodeQueue.remove();
+            qeNode.suffixLink = searchLink(qeNode.parent,qeNode.charToParent);  // Рекурсивно вычисляем суффиксные ссылки
+            for (int i = 0; i < qeNode.son.length; i++)
+                if( qeNode.son[i] != null)
+                    nodeQueue.add(qeNode.son[i]);
+        }
+
+    }
+    public void addString(String str) {
+        Node cur = root;
+        for (int i = 0; i < str.length(); i++) {
+            int index = (int) (str.charAt(i) - 'a');
+            if (cur.son[index] == null) {
+                cur.son[index] = new Node(this.powerAlp);
+                cur.son[index].parent = cur;
+                cur.son[index].end = false;
+                cur.son[index].go = null;
+                cur.son[index].suffixLink = null;
+                cur.son[index].num = (countNode++);
+                cur.son[index].charToParent = str.charAt(i);
+            }
+            cur = cur.son[index];
+        }
+        cur.end = true;
     }
 }
-
 public class Aho {
-
-    public static Tria root = new Tria(0);
-    public static int countPattern = 0;
-
-    public static void add(String text, Tria roots) {
-        int flag = 0;
-        //Перебераем все исходящие из вершины рёбра.
-        for (int i = 0; i < roots.arrChar.size(); i++) {
-            if (roots.arrChar.get(i).letter == text.charAt(0)) {
-                add(text.substring(1, text.length()), roots.arrChar.get(i).link);
-                flag = 1;
-                break;
-            }
-        }
-        //Добавляем новое ребро
-        if (flag == 0 && text.length() != 0) {
-            if (text.length() == 1) {
-                countPattern++;
-                roots.arrChar.add(new Vertex(text.charAt(0), new Tria(countPattern)));
-            } else {
-                roots.arrChar.add(new Vertex(text.charAt(0), new Tria(0)));
-                add(text.substring(1, text.length()), roots.arrChar.get(roots.arrChar.size() - 1).link);
-            }
-        }
-    }
-
     public static void main(String[] arg) {
-        add("he", root);
-        add("she", root);
-        add("his", root);
-        add("hers", root);
-        System.out.println(countPattern);
+        Tree myTree = new Tree();
+
+        myTree.addString("he");
+        myTree.addString("she");
+        myTree.addString("his");
+        myTree.addString("hers");
+        myTree.buildSuffixLink();
+        System.out.println(myTree.countNode);
     }
 }
