@@ -29,8 +29,7 @@ class Trie:
 			for sym, ch_node in node.links.iteritems():
 				w = node.fail
 				
-				while (sym not in w.links) and w != None:
-					assert w.fail != None
+				while w != None and (sym not in w.links):
 					w = w.fail
 
 				ch_node.fail = w.links[sym] if w else self.root
@@ -39,6 +38,22 @@ class Trie:
 				elif ch_node.fail.out != None:
 					ch_node.out = ch_node.fail.out
 
+				queue.append(ch_node)
+	
+	def print_trie(self):
+		queue = [self.root]
+
+		counter = 2
+		node_enum = {self.root : 1}
+		while len(queue) > 0:
+			node = queue.pop(0)
+			for sym, ch_node in node.links.iteritems():
+				if not ch_node in node_enum:
+					node_enum[ch_node] = counter
+					counter += 1
+				print node_enum[node], node_enum[ch_node], sym
+				#if ch_node.fail:
+				print node_enum[ch_node], node_enum[ch_node.fail], "S"
 				queue.append(ch_node)
 
 	def search_text(self, text):
@@ -75,7 +90,12 @@ def test():
 	print trie.search_text("abcba")
 
 def solve_rosalind():
-	pass
+	trie = Trie()
+	for line in open("tr.txt", "r"):
+		trie.add_pattern(line.strip("\n"))
+	trie.build_links()
+	trie.print_trie()
 
 if __name__ == "__main__":
 	test()
+	#solve_rosalind()
