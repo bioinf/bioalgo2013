@@ -74,7 +74,7 @@ def main():
     seq1, seq2 = SeqIO.parse(sys.stdin, "fasta")
     score, path = smith_waterman(seq1, seq2)
     print(score)
-    print(*align(seq1, seq2, path), sep=os.linesep)
+    print(*align(seq1, seq2, path), sep="\n")
 
 
 if __name__ == "__main__":

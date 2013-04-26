@@ -19,7 +19,7 @@ class Node(object):
 
 class Trie(object):
     def __init__(self):
-        self.nodes = [Node({}, False)]  # Add root.
+        self.nodes = [Node()]  # Add root.
 
     def _link(self, i):
         current = self.nodes[i]
