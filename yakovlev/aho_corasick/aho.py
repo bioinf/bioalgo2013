@@ -191,13 +191,13 @@ def rosalindEPM():
             print r+1,
 
 def main():
-    text = raw_input()
-    pattern_list = raw_input().split()
+    #text = raw_input()
+    #pattern_list = raw_input().split()
 
-    res = aho_corasik(text, pattern_list)
-    for pattern in res:
-        print pattern, res[pattern]
-    #rosalindEPM()
+    #res = aho_corasik(text, pattern_list)
+    #for pattern in res:
+    #    print pattern, res[pattern]
+    rosalindEPM()
 
 if __name__ == "__main__":
     main()
