@@ -4,8 +4,8 @@ public class BoyerMoore {
 
 	private String p, t;
 	private int m, n;
-	private ArrayList<Integer> ans;
-	ArrayList<ArrayList<Integer>> posOfChar;
+	private List<Integer> ans;
+	List<List<Integer>> posOfChar;
 	int[] L, l;
 
 	public BoyerMoore(String pattern, String text) {
