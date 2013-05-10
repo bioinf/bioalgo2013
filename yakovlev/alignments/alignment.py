@@ -35,52 +35,6 @@ def getGlobalScore(s1, s2, matrix, gap):
 
     return score
 
-def getGlobalScoreAffine2(s1, s2, matrix, gap_open, gap_ext):
-    M = len(s1)
-    N = len(s2)
-
-    score_m = [[float("-inf") for j in xrange(N+1)] for i in xrange(M+1)]
-    score_ix = [[float("-inf") for j in xrange(N+1)] for i in xrange(M+1)]
-    score_iy = [[float("-inf") for j in xrange(N+1)] for i in xrange(M+1)]
-
-    score_m[0][0] = 0
-    score_ix[0][0] = gap_open
-    score_iy[0] = [gap_open + i * gap_ext for i in xrange(N+1)]
-
-    for i in xrange(1,M+1):
-        score_ix[i][0] = score_ix[i-1][0] + gap_ext
-        for j in xrange(1,N+1):
-            m = getScore(s1[i-1], s2[j-1], matrix)
-            score_ix[i][j] = max(score_m[i-1][j] + gap_open,
-                                 score_ix[i-1][j] + gap_ext)
-            score_iy[i][j] = max(score_m[i][j-1] + gap_open,
-                                 score_iy[i][j-1] + gap_ext)
-            score_m[i][j] = max(score_m[i-1][j-1] + m,
-                                score_ix[i][j],
-                                score_iy[i][j])
-
-    return score_m, score_ix, score_iy
-
-def makeGaps2(s1, s2, score_m, score_iy, score_ix):
-    l1 = list(s1)
-    l2 = list(s2)
-
-    i = len(s1)
-    j = len(s2)
-    
-    while i != 0 and j != 0:
-        if score_m[i][j] == score_ix[i][j]:
-            l1.insert(i, '-')
-            j -= 1
-        if score_m[i][j] == score_iy[i][j]:
-            l2.insert(j, '-')
-            i -= 1
-        else:
-            i -= 1
-            j -= 1
-
-    return "".join(l1), "".join(l2)
-
 def getGlobalScoreAffine(s1, s2, matrix, gap_open, gap_ext):
     M = len(s1)
     N = len(s2)
@@ -97,35 +51,37 @@ def getGlobalScoreAffine(s1, s2, matrix, gap_open, gap_ext):
         score_ix[i][0] = score_ix[i-1][0] + gap_ext
         for j in xrange(1,N+1):
             m = getScore(s1[i-1], s2[j-1], matrix)
+            score_m[i][j] = max(score_m[i-1][j-1],
+                                score_ix[i-1][j-1],
+                                score_iy[i-1][j-1]) + m
             score_ix[i][j] = max(score_m[i-1][j] + gap_open,
-                                 score_ix[i-1][j] + gap_ext)
+                                 score_ix[i-1][j] + gap_ext,
+                                 score_iy[i-1][j] + gap_open)
             score_iy[i][j] = max(score_m[i][j-1] + gap_open,
-                                 score_iy[i][j-1] + gap_ext)
-            score_m[i][j] = max(score_m[i-1][j-1] + m,
-                                score_ix[i-1][j-1] + m,
-                                score_iy[i-1][j-1] + m)
+                                 score_iy[i][j-1] + gap_ext,
+                                 score_ix[i][j-1] + gap_open)
 
     return score_m, score_ix, score_iy
 
-def makeGaps(s1, s2, score_m, score_iy, score_ix):
+def makeGaps(s1, s2, score_m, score_ix, score_iy):
     l1 = list(s1)
     l2 = list(s2)
 
     i = len(s1)
     j = len(s2)
     
-    while i != 0 and j != 0:
+    while i != 0 or j != 0:
         l = [score_m[i][j], score_ix[i][j], score_iy[i][j]]
         p = l.index(max(l))
         if p == 0:
             i -= 1
             j -= 1
         elif p == 1:
-            l1.insert(i, '-')
-            j -= 1
-        else:
             l2.insert(j, '-')
             i -= 1
+        else:
+            l1.insert(i, '-')
+            j -= 1
 
     return "".join(l1), "".join(l2)
 
@@ -192,6 +148,10 @@ def readFASTA(fileName):
 def main():
     matrix_blo = MatrixInfo.blosum62
     matrix_pam = MatrixInfo.pam250
+    matrix_acgt = {('A', 'A') : 1, ('A', 'C') : 0, ('A', 'G') : 0, ('A', 'T') : 0,
+                   ('C', 'C') : 1, ('C', 'G') : 0, ('C', 'T') : 0, 
+                   ('G', 'G') : 1, ('G', 'T') : 0,
+                   ('T', 'T') : 1}
     gap = -5
     gap_open = -11
     gap_ext = -1
@@ -200,22 +160,23 @@ def main():
     M = len(l[0])
     N = len(l[1])
 
-    # print "GLOBAL ALIGNMENT"
-    # score = getGlobalScore(l[0], l[1], matrix_blo, gap)
-    # print score[M][N]
-    # # print ""
-
-    # print "LOCAL ALIGNMENT"
-    # score,from_s = getLocalScore(l[0], l[1], matrix_pam, gap)
-    # m = getLocalMax(score)
-    # print m[0]
-    # coords = getLocalCoords(from_s, m[1])
-    # print l[0][coords[0][0]:coords[1][0]]
-    # print l[1][coords[0][1]:coords[1][1]]
+    print "GLOBAL ALIGNMENT"
+    score = getGlobalScore(l[0], l[1], matrix_blo, gap)
+    print score[M][N]
     # print ""
 
-    # print "GLOBAL ALIGNMENT WITH AFFINE GAP PENALTY"
+    print "LOCAL ALIGNMENT"
+    score,from_s = getLocalScore(l[0], l[1], matrix_pam, gap)
+    m = getLocalMax(score)
+    print m[0]
+    coords = getLocalCoords(from_s, m[1])
+    print l[0][coords[0][0]:coords[1][0]]
+    print l[1][coords[0][1]:coords[1][1]]
+    print ""
+
+    print "GLOBAL ALIGNMENT WITH AFFINE GAP PENALTY"
     score_m,score_ix,score_iy = getGlobalScoreAffine(l[0], l[1], matrix_blo, gap_open, gap_ext)
+
     print max(score_m[M][N], score_ix[M][N], score_iy[M][N])
     s1,s2 = makeGaps(l[0], l[1], score_m, score_ix, score_iy)
     print s1
