@@ -15,9 +15,10 @@ for x, y in blosum62.keys():
 
 def needleman_wunsch(seq1, seq2, gap_open, gap_extend=0):
     m, n = len(seq1), len(seq2)
-    v = np.zeros((m + 1, n + 1))
-    e = np.zeros((m + 1, n + 1))
-    f = np.zeros((m + 1, n + 1))
+    dim = m + 1, n + 1
+    e, backe = np.zeros(dim), np.zeros(dim, dtype="S2")
+    f, backf = np.zeros(dim), np.zeros(dim, dtype="S2")
+    v, backv = np.zeros(dim), np.zeros(dim, dtype="S2")
 
     v[:, 0] = -gap_open - np.arange(0, m + 1) * gap_extend
     v[0, :] = -gap_open - np.arange(0, n + 1) * gap_extend
@@ -30,35 +31,50 @@ def needleman_wunsch(seq1, seq2, gap_open, gap_extend=0):
     for i in xrange(1, m + 1):
         for j in xrange(1, n + 1):
             ch1, ch2 = seq1[i - 1], seq2[j - 1]
-            e[i, j] = max(e[i, j - 1] - gap_extend, v[i, j - 1] - gap_open)
-            f[i, j] = max(f[i - 1, j] - gap_extend, v[i - 1, j] - gap_open)
-            v[i, j] = max(e[i, j], f[i, j],
-                          v[i - 1, j - 1] + blosum62[ch1, ch2])
+            e[i, j], backe[i, j] = max(
+                (e[i, j - 1] - gap_extend, "d<"),
+                (v[i, j - 1] - gap_open, "m<"))
+            f[i, j], backf[i, j] = max(
+                (f[i - 1, j] - gap_extend, "i^"),
+                (v[i - 1, j] - gap_open, "m^"))
+            v[i, j], backv[i, j] = max(
+                (e[i, j], backe[i, j]),
+                (f[i, j], backf[i, j]),
+                (v[i - 1, j - 1] + blosum62[ch1, ch2], "m\\"))
 
-    return v, e, f
+    return int(v[-1, -1]), (backe, backf, backv)
 
 
-def trace(seq1, seq2, v, e, f, gap_open, gap_extend=0):
+def trace(seq1, seq2, (backe, backf, backv)):
     tmp1, tmp2 = [], []
     i, j = len(seq1), len(seq2)
 
-    while i or j:
+    back = backv
+    while i and j:
         ch1, ch2 = seq1[i - 1], seq2[j - 1]
-        if v[i, j] in [v[i, j - 1] - gap_open, e[i, j - 1] - gap_extend]:
+        current = back[i, j]
+        if "<" in current:
             tmp1.append("-")
             tmp2.append(ch2)
             j -= 1
-        elif v[i, j] in [v[i - 1, j] - gap_open, f[i - 1, j] - gap_extend]:
+        elif "^" in current:
             tmp1.append(ch1)
             tmp2.append("-")
             i -= 1
-        elif v[i, j] == v[i - 1, j - 1] + blosum62[ch1, ch2]:
+        elif "\\" in current:
             tmp1.append(ch1)
             tmp2.append(ch2)
             i -= 1
             j -= 1
         else:
-            assert False  # Impossible.
+            assert False
+
+        if "m" in current:
+            back = backv
+        elif "i" in current:
+            back = backf
+        else:
+            back = backe
 
     return "".join(reversed(tmp1)), "".join(reversed(tmp2))
 
@@ -67,11 +83,11 @@ def main():
     gap_open, gap_extend = 11, 1
 
     seq1, seq2 = SeqIO.parse(sys.stdin, "fasta")
-    v, e, f = needleman_wunsch(seq1, seq2, gap_open, gap_extend)
-    score = int(v[-1, -1])
+    score, back = needleman_wunsch(seq1, seq2, gap_open, gap_extend)
     print(score)
-    tr1, tr2 = trace(seq1, seq2, v, e, f, gap_open, gap_extend)
-    print(tr1, tr2, sep="\n")
+    tr1, tr2 = trace(seq1, seq2, back)
+    print(tr1)
+    print(tr2)
 
 
 
