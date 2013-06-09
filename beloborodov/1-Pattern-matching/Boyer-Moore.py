@@ -31,6 +31,7 @@ def find_next_char(LastOccur, Symbol, Position, len):
     for i in LastOccur[Symbol]:
         if i < Position:
             return Position-i
+    return Position+1
 
 def compute_same_suffix_distance(s):
     n = len(s)
